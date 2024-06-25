@@ -127,7 +127,7 @@ struct RfuBlockSend
 {
     /* 0x00 */ u16 next;
     /* 0x02 */ u16 count;
-    /* 0x04 */ const u8 *payload;
+    /* 0x04 */ const u16 *payload;
     /* 0x08 */ u32 receivedFlags;
     /* 0x0c */ u32 failedFlags;
     /* 0x10 */ bool8 sending;
@@ -247,7 +247,7 @@ bool32 IsSendingKeysToRfu(void);
 void StartSendingKeysToRfu(void);
 void Rfu_SetBerryBlenderLinkCallback(void);
 u8 Rfu_GetBlockReceivedStatus(void);
-bool32 Rfu_InitBlockSend(const u8 *src, size_t size);
+bool32 Rfu_InitBlockSend(const u16 *src, size_t size);
 void ClearLinkRfuCallback(void);
 u8 Rfu_GetLinkPlayerCount(void);
 u8 Rfu_GetMultiplayerId(void);

@@ -976,7 +976,7 @@ static void HandleSendFailure(u8 unused, u32 flags)
 {
     s32 i, j, temp;
 
-    const u8 *payload = gRfu.sendBlock.payload;
+    const u16 *payload = gRfu.sendBlock.payload;
     for (i = 0; i < gRfu.sendBlock.count; i++)
     {
         if (!(flags & 1))
@@ -1284,7 +1284,7 @@ void Rfu_SendPacket(void *data)
     }
 }
 
-bool32 Rfu_InitBlockSend(const u8 *src, size_t size)
+bool32 Rfu_InitBlockSend(const u16 *src, size_t size)
 {
     bool8 r4;
     if (gRfu.callback != NULL)
@@ -1336,7 +1336,7 @@ static void HandleBlockSend(void)
 static void SendNextBlock(void)
 {
     s32 i;
-    const u8 *src = gRfu.sendBlock.payload;
+    const u16 *src = gRfu.sendBlock.payload;
     gSendCmd[0] = RFUCMD_SEND_BLOCK | gRfu.sendBlock.next;
     for (i = 0; i < CMD_LENGTH - 1; i++)
         gSendCmd[i + 1] = (src[(i << 1) + gRfu.sendBlock.next * 12 + 1] << 8) | src[(i << 1) + gRfu.sendBlock.next * 12 + 0];
@@ -1350,7 +1350,7 @@ static void SendNextBlock(void)
 
 static void SendLastBlock(void)
 {
-    const u8 *src = gRfu.sendBlock.payload;
+    const u16 *src = gRfu.sendBlock.payload;
     u8 mpId = GetMultiplayerId();
     s32 i;
     if (gRfu.parentChild == MODE_CHILD)

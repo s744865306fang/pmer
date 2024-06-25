@@ -39,7 +39,7 @@ struct BlockTransfer
 {
     u16 pos;
     u16 size;
-    const u8 *src;
+    const u16 *src;
     bool8 active;
     u8 multiplayerId;
 };
@@ -108,7 +108,7 @@ static EWRAM_DATA u8 sLinkTestDebugValuesEnabled = 0;
 static EWRAM_DATA u8 sDummyFlag = FALSE;
 EWRAM_DATA u32 gBerryBlenderKeySendAttempts = 0;
 EWRAM_DATA u16 gBlockRecvBuffer[MAX_RFU_PLAYERS][BLOCK_BUFFER_SIZE / 2] = {};
-EWRAM_DATA u8 gBlockSendBuffer[BLOCK_BUFFER_SIZE] = {};
+EWRAM_DATA u16 gBlockSendBuffer[BLOCK_BUFFER_SIZE] = {};
 static EWRAM_DATA bool8 sLinkOpen = FALSE;
 EWRAM_DATA u16 gLinkType = 0;
 static EWRAM_DATA u16 sTimeOutCounter = 0;
@@ -972,7 +972,7 @@ static void LinkCB_BlockSendBegin(void)
 static void LinkCB_BlockSend(void)
 {
     int i;
-    const u8 *src;
+    const u16 *src;
 
     src = sBlockSend.src;
     gSendCmd[0] = LINKCMD_CONT_BLOCK;

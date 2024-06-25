@@ -688,6 +688,7 @@ static void rfu_STC_readParentCandidateList(void)
     u8 numSlots, i, check_sum, my_check_sum, j;
     u8 *uname_p, *packet_p;
     struct RfuTgtData *target;
+    u8 *packet_end = &gRfuFixed->STWIBuffer->rxPacketAlloc.rfuPacket8.data[sizeof(gRfuFixed->STWIBuffer->rxPacketAlloc.rfuPacket8.data)];
 
     CpuFill16(0, gRfuLinkStatus->partner, sizeof(gRfuLinkStatus->partner));
     packet_p = &gRfuFixed->STWIBuffer->rxPacketAlloc.rfuPacket8.data[0];
@@ -704,8 +705,11 @@ static void rfu_STC_readParentCandidateList(void)
         my_check_sum = 0;
         for (j = 0; j < 8; ++j)
         {
-            my_check_sum += *packet_p++;
-            my_check_sum += *uname_p++;
+            if (packet_p < packet_end && uname_p < packet_end)
+            {
+                my_check_sum += *packet_p++;
+                my_check_sum += *uname_p++;
+            }
         }
         if (my_check_sum == check_sum)
         {
@@ -725,7 +729,8 @@ static void rfu_STC_readParentCandidateList(void)
                 target->gname[j] = *packet_p++;
             ++packet_p;
             for (j = 0; j < PLAYER_NAME_LENGTH + 1; ++j)
-                target->uname[j] = *packet_p++;
+                if (packet_p < packet_end)
+                    target->uname[j] = *packet_p++;
             ++gRfuLinkStatus->findParentCount;
         }
     }
