@@ -686,7 +686,7 @@ const struct Item gItems[] =
 
     [ITEM_MAX_HONEY] =
     {
-        .name = _("Max Honey"),
+        .name = _("极巨甜蜜"),
         .price = 8000,
         .description = sMaxHoneyDesc,
         .pocket = POCKET_ITEMS,
@@ -700,7 +700,7 @@ const struct Item gItems[] =
 
     [ITEM_PEWTER_CRUNCHIES] =
     {
-        .name = _("PewtrCrnches"),
+        .name = _("深灰米果"),
         .price = 250,
         .description = sPewterCrunchiesDesc,
         .pocket = POCKET_ITEMS,
@@ -712,7 +712,7 @@ const struct Item gItems[] =
 
     [ITEM_RAGE_CANDY_BAR] =
     {
-        .name = _("RageCandyBar"),
+        .name = _("愤怒馒头"),
         .price = 350,
         .description = sRageCandyBarDesc,
         .pocket = POCKET_ITEMS,
@@ -748,7 +748,7 @@ const struct Item gItems[] =
 
     [ITEM_CASTELIACONE] =
     {
-        .name = _("Casteliacone"),
+        .name = _("飞云冰淇淋"),
         .price = 350,
         .description = sCasteliaconeDesc,
         .pocket = POCKET_ITEMS,
@@ -760,7 +760,7 @@ const struct Item gItems[] =
 
     [ITEM_LUMIOSE_GALETTE] =
     {
-        .name = _("LumioseGlete"),
+        .name = _("密哈雷格雷派饼"),
         .price = 350,
         .description = sLumioseGaletteDesc,
         .pocket = POCKET_ITEMS,
@@ -772,7 +772,7 @@ const struct Item gItems[] =
 
     [ITEM_SHALOUR_SABLE] =
     {
-        .name = _("ShalourSable"),
+        .name = _("婆罗沙布蕾"),
         .price = 350,
         .description = sShalourSableDesc,
         .pocket = POCKET_ITEMS,
@@ -967,7 +967,7 @@ const struct Item gItems[] =
 
     [ITEM_ABILITY_PATCH] =
     {
-        .name = _("AbilityPatch"),
+        .name = _("特性膏药"),
         .price = 0,
         .holdEffectParam = 0,
         .description = sAbilityPatchDesc,
@@ -980,7 +980,7 @@ const struct Item gItems[] =
 
     [ITEM_LONELY_MINT] =
     {
-        .name = _("Lonely Mint"),
+        .name = _("怕寂寞薄荷"),
         .price = 20,
         .description = sLonelyMintDesc,
         .pocket = POCKET_ITEMS,
@@ -991,7 +991,7 @@ const struct Item gItems[] =
 
     [ITEM_ADAMANT_MINT] =
     {
-        .name = _("Adamant Mint"),
+        .name = _("固执薄荷"),
         .price = 20,
         .description = sAdamantMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1002,7 +1002,7 @@ const struct Item gItems[] =
 
     [ITEM_NAUGHTY_MINT] =
     {
-        .name = _("Naughty Mint"),
+        .name = _("顽皮薄荷"),
         .price = 20,
         .description = sNaughtyMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1013,7 +1013,7 @@ const struct Item gItems[] =
 
     [ITEM_BRAVE_MINT] =
     {
-        .name = _("Brave Mint"),
+        .name = _("勇敢薄荷"),
         .price = 20,
         .description = sBraveMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1024,7 +1024,7 @@ const struct Item gItems[] =
 
     [ITEM_BOLD_MINT] =
     {
-        .name = _("Bold Mint"),
+        .name = _("大胆薄荷"),
         .price = 20,
         .description = sBoldMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1035,7 +1035,7 @@ const struct Item gItems[] =
 
     [ITEM_IMPISH_MINT] =
     {
-        .name = _("Impish Mint"),
+        .name = _("淘气薄荷"),
         .price = 20,
         .description = sImpishMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1046,7 +1046,7 @@ const struct Item gItems[] =
 
     [ITEM_LAX_MINT] =
     {
-        .name = _("Lax Mint"),
+        .name = _("乐天薄荷"),
         .price = 20,
         .description = sLaxMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1057,7 +1057,7 @@ const struct Item gItems[] =
 
     [ITEM_RELAXED_MINT] =
     {
-        .name = _("Relaxed Mint"),
+        .name = _("悠闲薄荷"),
         .price = 20,
         .description = sRelaxedMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1068,7 +1068,7 @@ const struct Item gItems[] =
 
     [ITEM_MODEST_MINT] =
     {
-        .name = _("Modest Mint"),
+        .name = _("内敛薄荷"),
         .price = 20,
         .description = sModestMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1079,7 +1079,7 @@ const struct Item gItems[] =
 
     [ITEM_MILD_MINT] =
     {
-        .name = _("Mild Mint"),
+        .name = _("慢吞吞薄荷"),
         .price = 20,
         .description = sMildMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1090,7 +1090,7 @@ const struct Item gItems[] =
 
     [ITEM_RASH_MINT] =
     {
-        .name = _("Rash Mint"),
+        .name = _("马虎薄荷"),
         .price = 20,
         .description = sRashMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1101,7 +1101,7 @@ const struct Item gItems[] =
 
     [ITEM_QUIET_MINT] =
     {
-        .name = _("Quiet Mint"),
+        .name = _("冷静薄荷"),
         .price = 20,
         .description = sQuietMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1112,7 +1112,7 @@ const struct Item gItems[] =
 
     [ITEM_CALM_MINT] =
     {
-        .name = _("Calm Mint"),
+        .name = _("温和薄荷"),
         .price = 20,
         .description = sCalmMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1123,7 +1123,7 @@ const struct Item gItems[] =
 
     [ITEM_GENTLE_MINT] =
     {
-        .name = _("Gentle Mint"),
+        .name = _("温顺薄荷"),
         .price = 20,
         .description = sGentleMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1134,7 +1134,7 @@ const struct Item gItems[] =
 
     [ITEM_CAREFUL_MINT] =
     {
-        .name = _("Careful Mint"),
+        .name = _("慎重薄荷"),
         .price = 20,
         .description = sCarefulMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1145,7 +1145,7 @@ const struct Item gItems[] =
 
     [ITEM_SASSY_MINT] =
     {
-        .name = _("Sassy Mint"),
+        .name = _("自大薄荷"),
         .price = 20,
         .description = sSassyMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1156,7 +1156,7 @@ const struct Item gItems[] =
 
     [ITEM_TIMID_MINT] =
     {
-        .name = _("Timid Mint"),
+        .name = _("胆小薄荷"),
         .price = 20,
         .description = sTimidMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1167,7 +1167,7 @@ const struct Item gItems[] =
 
     [ITEM_HASTY_MINT] =
     {
-        .name = _("Hasty Mint"),
+        .name = _("急躁薄荷"),
         .price = 20,
         .description = sHastyMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1178,7 +1178,7 @@ const struct Item gItems[] =
 
     [ITEM_JOLLY_MINT] =
     {
-        .name = _("Jolly Mint"),
+        .name = _("爽朗薄荷"),
         .price = 20,
         .description = sJollyMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1189,7 +1189,7 @@ const struct Item gItems[] =
 
     [ITEM_NAIVE_MINT] =
     {
-        .name = _("Naive Mint"),
+        .name = _("天真薄荷"),
         .price = 20,
         .description = sNaiveMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1200,7 +1200,7 @@ const struct Item gItems[] =
 
     [ITEM_SERIOUS_MINT] =
     {
-        .name = _("Serious Mint"),
+        .name = _("认真薄荷"),
         .price = 20,
         .description = sSeriousMintDesc,
         .pocket = POCKET_ITEMS,
@@ -1224,7 +1224,7 @@ const struct Item gItems[] =
 
     [ITEM_EXP_CANDY_XS] =
     {
-        .name = _("Exp.Candy XS"),
+        .name = _("经验糖果XS"),
         .price = 20,
         .holdEffectParam = EXP_100,
         .description = sExpCandyXSDesc,
@@ -1236,7 +1236,7 @@ const struct Item gItems[] =
 
     [ITEM_EXP_CANDY_S] =
     {
-        .name = _("Exp.Candy S"),
+        .name = _("经验糖果S"),
         .price = 240,
         .holdEffectParam = EXP_800,
         .description = sExpCandySDesc,
@@ -1248,7 +1248,7 @@ const struct Item gItems[] =
 
     [ITEM_EXP_CANDY_M] =
     {
-        .name = _("Exp.Candy M"),
+        .name = _("经验糖果M"),
         .price = 1000,
         .holdEffectParam = EXP_3000,
         .description = sExpCandyMDesc,
@@ -1260,7 +1260,7 @@ const struct Item gItems[] =
 
     [ITEM_EXP_CANDY_L] =
     {
-        .name = _("Exp.Candy L"),
+        .name = _("经验糖果L"),
         .price = 3000,
         .holdEffectParam = EXP_10000,
         .description = sExpCandyLDesc,
@@ -1272,7 +1272,7 @@ const struct Item gItems[] =
 
     [ITEM_EXP_CANDY_XL] =
     {
-        .name = _("Exp.Candy XL"),
+        .name = _("经验糖果XL"),
         .price = 10000,
         .holdEffectParam = EXP_30000,
         .description = sExpCandyXLDesc,
@@ -1284,7 +1284,7 @@ const struct Item gItems[] =
 
     [ITEM_DYNAMAX_CANDY] =
     {
-        .name = _("DynamaxCandy"),
+        .name = _("极巨糖果"),
         .price = 0,
         .description = sDynamaxCandyDesc,
         .pocket = POCKET_ITEMS,
@@ -1397,7 +1397,7 @@ const struct Item gItems[] =
 
     [ITEM_LURE] =
     {
-        .name = _("Lure"),
+        .name = _("引虫香水"),
         .price = 400,
         .holdEffectParam = 100,
         .description = sLureDesc,
@@ -1410,7 +1410,7 @@ const struct Item gItems[] =
 
     [ITEM_SUPER_LURE] =
     {
-        .name = _("Super Lure"),
+        .name = _("白银香水"),
         .price = 700,
         .holdEffectParam = 200,
         .description = sSuperLureDesc,
@@ -1423,7 +1423,7 @@ const struct Item gItems[] =
 
     [ITEM_MAX_LURE] =
     {
-        .name = _("Max Lure"),
+        .name = _("黄金香水"),
         .price = 900,
         .holdEffectParam = 250,
         .description = sMaxLureDesc,
@@ -1583,7 +1583,7 @@ const struct Item gItems[] =
 
     [ITEM_POKE_TOY] =
     {
-        .name = _("Poké Toy"),
+        .name = _("宝可尾草"),
         .price = 100,
         .description = sPokeToyDesc,
         .pocket = POCKET_ITEMS,
@@ -1611,7 +1611,7 @@ const struct Item gItems[] =
 
     [ITEM_BOTTLE_CAP] =
     {
-        .name = _("Bottle Cap"),
+        .name = _("银色王冠"),
         .price = 5000,
         .description = sBottleCapDesc,
         .pocket = POCKET_ITEMS,
@@ -1622,7 +1622,7 @@ const struct Item gItems[] =
 
     [ITEM_GOLD_BOTTLE_CAP] =
     {
-        .name = _("GoldBottlCap"),
+        .name = _("金色王冠"),
         .price = 10000,
         .description = sGoldBottleCapDesc,
         .pocket = POCKET_ITEMS,
@@ -1644,7 +1644,7 @@ const struct Item gItems[] =
 
     [ITEM_BIG_NUGGET] =
     {
-        .name = _("Big Nugget"),
+        .name = _("巨大金珠"),
         .price = 40000,
         .description = sBigNuggetDesc,
         .pocket = POCKET_ITEMS,
@@ -1677,7 +1677,7 @@ const struct Item gItems[] =
 
     [ITEM_BALM_MUSHROOM] =
     {
-        .name = _("Balm Mushroom"),
+        .name = _("芳香蘑菇"),
         .price = 15000,
         .description = sBalmMushroomDesc,
         .pocket = POCKET_ITEMS,
@@ -1710,7 +1710,7 @@ const struct Item gItems[] =
 
     [ITEM_PEARL_STRING] =
     {
-        .name = _("Pearl String"),
+        .name = _("丸子珍珠"),
         .price = 20000,
         .description = sPearlStringDesc,
         .pocket = POCKET_ITEMS,
@@ -1743,7 +1743,7 @@ const struct Item gItems[] =
 
     [ITEM_COMET_SHARD] =
     {
-        .name = _("Comet Shard"),
+        .name = _("彗星碎片"),
         .price = 25000,
         .description = sCometShardDesc,
         .pocket = POCKET_ITEMS,
@@ -1875,7 +1875,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_COPPER] =
     {
-        .name = _("Relic Copper"),
+        .name = _("古代铜币"),
         .price = 0,
         .description = sRelicCopperDesc,
         .pocket = POCKET_ITEMS,
@@ -1886,7 +1886,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_SILVER] =
     {
-        .name = _("Relic Silver"),
+        .name = _("古代银币"),
         .price = 0,
         .description = sRelicSilverDesc,
         .pocket = POCKET_ITEMS,
@@ -1897,7 +1897,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_GOLD] =
     {
-        .name = _("Relic Gold"),
+        .name = _("古代金币"),
         .price = 0,
         .description = sRelicGoldDesc,
         .pocket = POCKET_ITEMS,
@@ -1908,7 +1908,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_VASE] =
     {
-        .name = _("Relic Vase"),
+        .name = _("古代之壶"),
         .price = 0,
         .description = sRelicVaseDesc,
         .pocket = POCKET_ITEMS,
@@ -1919,7 +1919,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_BAND] =
     {
-        .name = _("Relic Band"),
+        .name = _("古代手镯"),
         .price = 0,
         .description = sRelicBandDesc,
         .pocket = POCKET_ITEMS,
@@ -1930,7 +1930,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_STATUE] =
     {
-        .name = _("Relic Statue"),
+        .name = _("古代石像"),
         .price = 0,
         .description = sRelicStatueDesc,
         .pocket = POCKET_ITEMS,
@@ -1941,7 +1941,7 @@ const struct Item gItems[] =
 
     [ITEM_RELIC_CROWN] =
     {
-        .name = _("Relic Crown"),
+        .name = _("古代王冠"),
         .price = 0,
         .description = sRelicCrownDesc,
         .pocket = POCKET_ITEMS,
@@ -1952,7 +1952,7 @@ const struct Item gItems[] =
 
     [ITEM_STRANGE_SOUVENIR] =
     {
-        .name = _("StrngeSouvnr"),
+        .name = _("神秘摆设"),
         .price = 3000,
         .description = sStrangeSouvenirDesc,
         .pocket = POCKET_ITEMS,
@@ -2116,7 +2116,7 @@ const struct Item gItems[] =
 
     [ITEM_FOSSILIZED_BIRD] =
     {
-        .name = _("FosslzedBird"),
+        .name = _("化石鸟"),
         .price = 5000,
         .description = sFossilizedBirdDesc,
         .pocket = POCKET_ITEMS,
@@ -2127,7 +2127,7 @@ const struct Item gItems[] =
 
     [ITEM_FOSSILIZED_FISH] =
     {
-        .name = _("FosslzedFish"),
+        .name = _("化石鱼"),
         .price = 5000,
         .description = sFossilizedFishDesc,
         .pocket = POCKET_ITEMS,
@@ -2138,7 +2138,7 @@ const struct Item gItems[] =
 
     [ITEM_FOSSILIZED_DRAKE] =
     {
-        .name = _("FosslzedDrke"),
+        .name = _("化石龙"),
         .price = 5000,
         .description = sFossilizedDrakeDesc,
         .pocket = POCKET_ITEMS,
@@ -2149,7 +2149,7 @@ const struct Item gItems[] =
 
     [ITEM_FOSSILIZED_DINO] =
     {
-        .name = _("FosslzedDino"),
+        .name = _("化石海兽"),
         .price = 5000,
         .description = sFossilizedDinoDesc,
         .pocket = POCKET_ITEMS,
@@ -2162,7 +2162,7 @@ const struct Item gItems[] =
 
     [ITEM_GROWTH_MULCH] =
     {
-        .name = _("Growth Mulch"),
+        .name = _("速速肥"),
         .price = 200,
         .description = sGrowthMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2173,7 +2173,7 @@ const struct Item gItems[] =
 
     [ITEM_DAMP_MULCH] =
     {
-        .name = _("Damp Mulch"),
+        .name = _("湿湿肥"),
         .price = 200,
         .description = sDampMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2184,7 +2184,7 @@ const struct Item gItems[] =
 
     [ITEM_STABLE_MULCH] =
     {
-        .name = _("Stable Mulch"),
+        .name = _("久久肥"),
         .price = 200,
         .description = sStableMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2195,7 +2195,7 @@ const struct Item gItems[] =
 
     [ITEM_GOOEY_MULCH] =
     {
-        .name = _("Gooey Mulch"),
+        .name = _("粘粘肥"),
         .price = 200,
         .description = sGooeyMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2206,7 +2206,7 @@ const struct Item gItems[] =
 
     [ITEM_RICH_MULCH] =
     {
-        .name = _("Rich Mulch"),
+        .name = _("硕果肥"),
         .price = 200,
         .description = sRichMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2217,7 +2217,7 @@ const struct Item gItems[] =
 
     [ITEM_SURPRISE_MULCH] =
     {
-        .name = _("SurprseMulch"),
+        .name = _("吃惊肥"),
         .price = 200,
         .description = sSurpriseMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2228,7 +2228,7 @@ const struct Item gItems[] =
 
     [ITEM_BOOST_MULCH] =
     {
-        .name = _("Boost Mulch"),
+        .name = _("劲劲肥"),
         .price = 200,
         .description = sBoostMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2239,7 +2239,7 @@ const struct Item gItems[] =
 
     [ITEM_AMAZE_MULCH] =
     {
-        .name = _("Amaze Mulch"),
+        .name = _("超效肥"),
         .price = 200,
         .description = sAmazeMulchDesc,
         .pocket = POCKET_ITEMS,
@@ -2322,7 +2322,7 @@ const struct Item gItems[] =
 
     [ITEM_WISHING_PIECE] =
     {
-        .name = _("WishingPiece"),
+        .name = _("许愿星碎片"),
         .price = 20,
         .description = sWishingPieceDesc,
         .pocket = POCKET_ITEMS,
@@ -2333,7 +2333,7 @@ const struct Item gItems[] =
 
     [ITEM_GALARICA_TWIG] =
     {
-        .name = _("GalaricaTwig"),
+        .name = _("迦勒豆蔻枝"),
         .price = 40,
         .description = sGalaricaTwigDesc,
         .pocket = POCKET_ITEMS,
@@ -2344,7 +2344,7 @@ const struct Item gItems[] =
 
     [ITEM_ARMORITE_ORE] =
     {
-        .name = _("Armorite Ore"),
+        .name = _("铠甲矿石"),
         .price = 40,
         .description = sArmoriteOreDesc,
         .pocket = POCKET_ITEMS,
@@ -2355,7 +2355,7 @@ const struct Item gItems[] =
 
     [ITEM_DYNITE_ORE] =
     {
-        .name = _("Dynite Ore"),
+        .name = _("极矿石"),
         .price = 20,
         .description = sDyniteOreDesc,
         .pocket = POCKET_ITEMS,
@@ -2612,7 +2612,7 @@ const struct Item gItems[] =
 
     [ITEM_SWEET_APPLE] =
     {
-        .name = _("Sweet Apple"),
+        .name = _("甜甜苹果"),
         .price = 2200,
         .description = sSweetAppleDesc,
         .pocket = POCKET_ITEMS,
@@ -2623,7 +2623,7 @@ const struct Item gItems[] =
 
     [ITEM_TART_APPLE] =
     {
-        .name = _("Tart Apple"),
+        .name = _("酸酸苹果"),
         .price = 2200,
         .description = sTartAppleDesc,
         .pocket = POCKET_ITEMS,
@@ -2634,7 +2634,7 @@ const struct Item gItems[] =
 
     [ITEM_CRACKED_POT] =
     {
-        .name = _("Cracked Pot"),
+        .name = _("破裂的茶壶"),
         .price = 1600,
         .description = sCrackedPotDesc,
         .pocket = POCKET_ITEMS,
@@ -2645,7 +2645,7 @@ const struct Item gItems[] =
 
     [ITEM_CHIPPED_POT] =
     {
-        .name = _("Chipped Pot"),
+        .name = _("缺损的茶壶"),
         .price = 38000,
         .description = sChippedPotDesc,
         .pocket = POCKET_ITEMS,
@@ -2656,7 +2656,7 @@ const struct Item gItems[] =
 
     [ITEM_GALARICA_CUFF] =
     {
-        .name = _("GalaricaCuff"),
+        .name = _("迦勒豆蔻手环"),
         .price = 6000,
         .description = sGalaricaCuffDesc,
         .pocket = POCKET_ITEMS,
@@ -2667,7 +2667,7 @@ const struct Item gItems[] =
 
     [ITEM_GALARICA_WREATH] =
     {
-        .name = _("GalrcaWreath"),
+        .name = _("迦勒豆蔻花圈"),
         .price = 6000,
         .description = sGalaricaWreathDesc,
         .pocket = POCKET_ITEMS,
@@ -2802,7 +2802,7 @@ const struct Item gItems[] =
 
     [ITEM_STRAWBERRY_SWEET] =
     {
-        .name = _("StrwbrySweet"),
+        .name = _("草莓糖饰"),
         .price = 500,
         .description = sStrawberrySweetDesc,
         .pocket = POCKET_ITEMS,
@@ -2813,7 +2813,7 @@ const struct Item gItems[] =
 
     [ITEM_LOVE_SWEET] =
     {
-        .name = _("Love Sweet"),
+        .name = _("爱心糖饰"),
         .price = 500,
         .description = sLoveSweetDesc,
         .pocket = POCKET_ITEMS,
@@ -2824,7 +2824,7 @@ const struct Item gItems[] =
 
     [ITEM_BERRY_SWEET] =
     {
-        .name = _("Berry Sweet"),
+        .name = _("野莓糖饰"),
         .price = 500,
         .description = sBerrySweetDesc,
         .pocket = POCKET_ITEMS,
@@ -2835,7 +2835,7 @@ const struct Item gItems[] =
 
     [ITEM_CLOVER_SWEET] =
     {
-        .name = _("Clover Sweet"),
+        .name = _("幸运草糖饰"),
         .price = 500,
         .description = sCloverSweetDesc,
         .pocket = POCKET_ITEMS,
@@ -2846,7 +2846,7 @@ const struct Item gItems[] =
 
     [ITEM_FLOWER_SWEET] =
     {
-        .name = _("Flower Sweet"),
+        .name = _("花朵糖饰"),
         .price = 500,
         .description = sFlowerSweetDesc,
         .pocket = POCKET_ITEMS,
@@ -2857,7 +2857,7 @@ const struct Item gItems[] =
 
     [ITEM_STAR_SWEET] =
     {
-        .name = _("Star Sweet"),
+        .name = _("星星糖饰"),
         .price = 500,
         .description = sStarSweetDesc,
         .pocket = POCKET_ITEMS,
@@ -2868,7 +2868,7 @@ const struct Item gItems[] =
 
     [ITEM_RIBBON_SWEET] =
     {
-        .name = _("Ribbon Sweet"),
+        .name = _("蝴蝶结糖饰"),
         .price = 500,
         .description = sRibbonSweetDesc,
         .pocket = POCKET_ITEMS,
@@ -3475,7 +3475,7 @@ const struct Item gItems[] =
 
     [ITEM_RUSTED_SWORD] =
     {
-        .name = _("RustedSword"),
+        .name = _("腐朽的剑"),
         .price = 0,
         .description = sRustedSwordDesc,
         .pocket = POCKET_ITEMS,
@@ -3485,7 +3485,7 @@ const struct Item gItems[] =
 
     [ITEM_RUSTED_SHIELD] =
     {
-        .name = _("RustedShield"),
+        .name = _("腐朽的盾"),
         .price = 0,
         .description = sRustedShieldDesc,
         .pocket = POCKET_ITEMS,
@@ -4757,7 +4757,7 @@ const struct Item gItems[] =
 
     [ITEM_LEEK] =
     {
-        .name = _("Leek"),
+        .name = _("大葱"),
         .price = 1000,
         .holdEffect = HOLD_EFFECT_LEEK,
         .description = sLeekDesc,
@@ -6222,7 +6222,7 @@ const struct Item gItems[] =
 
     [ITEM_THROAT_SPRAY] =
     {
-        .name = _("Throat Spray"),
+        .name = _("爽喉喷雾"),
         .price = 4000,
         .holdEffect = HOLD_EFFECT_THROAT_SPRAY,
         .description = sThroatSprayDesc,
@@ -6234,7 +6234,7 @@ const struct Item gItems[] =
 
     [ITEM_EJECT_PACK] =
     {
-        .name = _("Eject Pack"),
+        .name = _("避难背包"),
         .price = 4000,
         .holdEffect = HOLD_EFFECT_EJECT_PACK,
         .description = sEjectPackDesc,
@@ -6246,7 +6246,7 @@ const struct Item gItems[] =
 
     [ITEM_HEAVY_DUTY_BOOTS] =
     {
-        .name = _("Heavy-DtyBts"),
+        .name = _("厚底靴"),
         .price = 4000,
         .holdEffect = HOLD_EFFECT_HEAVY_DUTY_BOOTS,
         .description = sHeavyDutyBootsDesc,
@@ -6258,7 +6258,7 @@ const struct Item gItems[] =
 
     [ITEM_BLUNDER_POLICY] =
     {
-        .name = _("BlundrPolicy"),
+        .name = _("打空保险"),
         .price = 4000,
         .holdEffect = HOLD_EFFECT_BLUNDER_POLICY,
         .description = sBlunderPolicyDesc,
@@ -6270,7 +6270,7 @@ const struct Item gItems[] =
 
     [ITEM_ROOM_SERVICE] =
     {
-        .name = _("Room Service"),
+        .name = _("客房服务"),
         .price = 4000,
         .holdEffect = HOLD_EFFECT_ROOM_SERVICE,
         .description = sRoomServiceDesc,
@@ -6282,7 +6282,7 @@ const struct Item gItems[] =
 
     [ITEM_UTILITY_UMBRELLA] =
     {
-        .name = _("UtltyUmbrlla"),
+        .name = _("万能伞"),
         .price = 4000,
         .holdEffect = HOLD_EFFECT_UTILITY_UMBRELLA,
         .description = sUtilityUmbrellaDesc,
@@ -8465,7 +8465,7 @@ const struct Item gItems[] =
 
     [ITEM_CATCHING_CHARM] =
     {
-        .name = _("CatchngCharm"),
+        .name = _("防晃护符"),
         .price = 0,
         .importance = 1,
         .description = sCatchingCharmDesc,
@@ -8476,7 +8476,7 @@ const struct Item gItems[] =
 
     [ITEM_EXP_CHARM] =
     {
-        .name = _("Exp. Charm"),
+        .name = _("经验护符"),
         .price = 0,
         .importance = 1,
         .description = sExpCharmDesc,
@@ -8489,7 +8489,7 @@ const struct Item gItems[] =
 
     [ITEM_ROTOM_CATALOG] =
     {
-        .name = _("RotomCatalog"),
+        .name = _("洛托姆形录"),
         .price = 0,
         .importance = 1,
         .description = sRotomCatalogDesc,
@@ -8511,7 +8511,7 @@ const struct Item gItems[] =
 
     [ITEM_REVEAL_GLASS] =
     {
-        .name = _("Reveal Glass"),
+        .name = _("现形镜"),
         .price = 0,
         .importance = 1,
         .description = sRevealGlassDesc,
@@ -8522,7 +8522,7 @@ const struct Item gItems[] =
 
     [ITEM_DNA_SPLICERS] =
     {
-        .name = _("DNA Splicers"),
+        .name = _("基因之楔"),
         .price = 0,
         .importance = 1,
         .description = sDNASplicersDesc,
@@ -8533,7 +8533,7 @@ const struct Item gItems[] =
 
     [ITEM_ZYGARDE_CUBE] =
     {
-        .name = _("Zygarde Cube"),
+        .name = _("基格尔德多面体"),
         .price = 0,
         .importance = 1,
         .description = sZygardeCubeDesc,
@@ -8544,7 +8544,7 @@ const struct Item gItems[] =
 
     [ITEM_PRISON_BOTTLE] =
     {
-        .name = _("Prison Bottle"),
+        .name = _("惩戒之壶"),
         .price = 0,
         .importance = 1,
         .description = sPrisonBottleDesc,
@@ -8555,7 +8555,7 @@ const struct Item gItems[] =
 
     [ITEM_N_SOLARIZER] =
     {
-        .name = _("N-Solarizer"),
+        .name = _("奈克洛索尔合体器"),
         .price = 0,
         .importance = 1,
         .description = sNSolarizerDesc,
@@ -8566,7 +8566,7 @@ const struct Item gItems[] =
 
     [ITEM_N_LUNARIZER] =
     {
-        .name = _("N-Lunarizer"),
+        .name = _("奈克洛露奈合体器"),
         .price = 0,
         .importance = 1,
         .description = sNLunarizerDesc,
@@ -8577,7 +8577,7 @@ const struct Item gItems[] =
 
     [ITEM_REINS_OF_UNITY] =
     {
-        .name = _("ReinsOfUnity"),
+        .name = _("牵绊拴绳"),
         .price = 0,
         .importance = 1,
         .description = sReinsOfUnityDesc,
@@ -8590,7 +8590,7 @@ const struct Item gItems[] =
 
     [ITEM_MEGA_RING] =
     {
-        .name = _("超级手镯"),
+        .name = _("mega手环"),
         .price = 0,
         .importance = 1,
         .description = sMegaRingDesc,
@@ -8612,7 +8612,7 @@ const struct Item gItems[] =
 
     [ITEM_DYNAMAX_BAND] =
     {
-        .name = _("Dynamax Band"),
+        .name = _("极巨腕带"),
         .price = 0,
         .description = sDynamaxBandDesc,
         .pocket = POCKET_KEY_ITEMS,
@@ -8754,7 +8754,7 @@ const struct Item gItems[] =
 
     [ITEM_POKEMON_BOX_LINK] =
     {
-        .name = _("{PKMN} Box Link"),
+        .name = _("宝可梦盒"),
         .price = 0,
         .description = sPokemonBoxLinkDesc,
         .importance = 1,
@@ -8798,7 +8798,7 @@ const struct Item gItems[] =
 
     [ITEM_POKE_RADAR] =
     {
-        .name = _("Poké Radar"),
+        .name = _("宝可追踪"),
         .price = 0,
         .description = sPokeRadarDesc,
         .importance = 1,
