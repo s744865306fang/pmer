@@ -1,4 +1,6 @@
-# pokeemerald-expansion
+# 口袋妖怪 终焉之章
+
+由[pokeemerald-expansion汉化](https://github.com/rh-hideout-chinese/pokeemerald-expansion)分支而来
 
 ## What is pokeemerald-expansion?
 
@@ -11,7 +13,7 @@ Based off RHH's pokeemerald-expansion v1.7.3 https://github.com/rh-hideout/pokee
 ```
 
 ## What features are included?
-- ***IMPORTANT*❗❗ Read through these to learn what features you can toggle**:
+- ***重要*❗❗ 阅读以下文件来查看你能开启的功能或特性**:
     - [Battle configurations](/include/config/battle.h)
     - [Pokémon configurations](/include/config/pokemon.h)
     - [Item configurations](/include/config/item.h)
