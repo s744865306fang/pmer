@@ -1,0 +1,487 @@
+.set LOCALID_ATTENDANT_SINGLES, 1
+.set LOCALID_ATTENDANT_DOUBLES, 6
+
+BattleFrontier_BattlePalaceLobby_MapScripts::
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, BattleFrontier_BattlePalaceLobby_OnFrame
+	map_script MAP_SCRIPT_ON_WARP_INTO_MAP_TABLE, BattleFrontier_BattlePalaceLobby_OnWarp
+	.byte 0
+
+BattleFrontier_BattlePalaceLobby_OnWarp:
+	map_script_2 VAR_TEMP_1, 0, BattleFrontier_BattlePalaceLobby_EventScript_TurnPlayerNorth
+	.2byte 0
+
+BattleFrontier_BattlePalaceLobby_EventScript_TurnPlayerNorth::
+	setvar VAR_TEMP_1, 1
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_NORTH
+	end
+
+BattleFrontier_BattlePalaceLobby_OnFrame:
+	map_script_2 VAR_TEMP_CHALLENGE_STATUS, 0, BattleFrontier_BattlePalaceLobby_EventScript_GetChallengeStatus
+	map_script_2 VAR_TEMP_CHALLENGE_STATUS, CHALLENGE_STATUS_SAVING, BattleFrontier_BattlePalaceLobby_EventScript_QuitWithoutSaving
+	map_script_2 VAR_TEMP_CHALLENGE_STATUS, CHALLENGE_STATUS_PAUSED, BattleFrontier_BattlePalaceLobby_EventScript_ResumeChallenge
+	map_script_2 VAR_TEMP_CHALLENGE_STATUS, CHALLENGE_STATUS_WON, BattleFrontier_BattlePalaceLobby_EventScript_WonChallenge
+	map_script_2 VAR_TEMP_CHALLENGE_STATUS, CHALLENGE_STATUS_LOST, BattleFrontier_BattlePalaceLobby_EventScript_LostChallenge
+	.2byte 0
+
+BattleFrontier_BattlePalaceLobby_EventScript_GetChallengeStatus::
+	frontier_getstatus
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_QuitWithoutSaving::
+	lockall
+	msgbox BattleFrontier_BattlePalaceLobby_Text_FailedToSaveBeforeEndingChallenge, MSGBOX_DEFAULT
+	closemessage
+	palace_set PALACE_DATA_WIN_STREAK, 0
+	palace_set PALACE_DATA_WIN_STREAK_ACTIVE, FALSE
+	frontier_set FRONTIER_DATA_CHALLENGE_STATUS, 0
+	setvar VAR_TEMP_CHALLENGE_STATUS, 255
+	releaseall
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_WonChallenge::
+	lockall
+	frontier_isbrain
+	goto_if_eq VAR_RESULT, TRUE, BattleFrontier_BattlePalaceLobby_EventScript_DefeatedMaven
+	msgbox BattleFrontier_BattlePalaceLobby_Text_FirmTrueBondsFor7WinStreak, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_GiveBattlePoints
+
+BattleFrontier_BattlePalaceLobby_EventScript_DefeatedMaven::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ToDefeatMavenAnd7Trainers, MSGBOX_DEFAULT
+BattleFrontier_BattlePalaceLobby_EventScript_GiveBattlePoints::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_PresentYouWithBattlePoints, MSGBOX_DEFAULT
+	frontier_givepoints
+	msgbox BattleFrontier_Text_ObtainedXBattlePoints, MSGBOX_GETPOINTS
+	message BattleFrontier_BattlePalaceLobby_Text_FeatWillBeRecorded
+	waitmessage
+	call BattleFrontier_BattlePalaceLobby_EventScript_SaveAfterChallenge
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ReturnWhenFortified, MSGBOX_DEFAULT
+	closemessage
+	setvar VAR_TEMP_CHALLENGE_STATUS, 255
+	releaseall
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_LostChallenge::
+	lockall
+	message BattleFrontier_BattlePalaceLobby_Text_ResultsWillBeRecorded
+	waitmessage
+	palace_set PALACE_DATA_WIN_STREAK_ACTIVE, FALSE
+	call BattleFrontier_BattlePalaceLobby_EventScript_SaveAfterChallenge
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ReturnWhenFortified, MSGBOX_DEFAULT
+	closemessage
+	setvar VAR_TEMP_CHALLENGE_STATUS, 255
+	releaseall
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_SaveAfterChallenge::
+	frontier_checkairshow
+	special LoadPlayerParty
+	special HealPlayerParty
+	palace_save 0
+	playse SE_SAVE
+	waitse
+	call BattleFrontier_EventScript_GetCantRecordBattle
+	goto_if_eq VAR_RESULT, TRUE, BattleFrontier_BattlePalaceLobby_EventScript_EndSaveAfterChallenge
+	message BattleFrontier_BattlePalaceLobby_Text_LikeToRecordMatch
+	waitmessage
+	multichoicedefault 20, 8, MULTI_YESNO, 1, FALSE
+	switch VAR_RESULT
+	case 1, BattleFrontier_BattlePalaceLobby_EventScript_EndSaveAfterChallenge
+	case 0, BattleFrontier_BattlePalaceLobby_EventScript_RecordMatch
+	case MULTI_B_PRESSED, BattleFrontier_BattlePalaceLobby_EventScript_EndSaveAfterChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_RecordMatch::
+	call BattleFrontier_EventScript_SaveBattle
+BattleFrontier_BattlePalaceLobby_EventScript_EndSaveAfterChallenge::
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_ResumeChallenge::
+	lockall
+	msgbox BattleFrontier_BattlePalaceLobby_Text_WeHaveBeenWaiting, MSGBOX_DEFAULT
+	message BattleFrontier_BattlePalaceLobby_Text_MustSaveBeforeChallenge
+	waitmessage
+	palace_save CHALLENGE_STATUS_SAVING
+	playse SE_SAVE
+	waitse
+	frontier_set FRONTIER_DATA_PAUSED, FALSE
+	setvar VAR_TEMP_CHALLENGE_STATUS, 255
+	goto BattleFrontier_BattlePalaceLobby_EventScript_EnterChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_SinglesAttendant::
+	lock
+	faceplayer
+	setvar VAR_FRONTIER_FACILITY, FRONTIER_FACILITY_PALACE
+	setvar VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_SINGLES
+	goto BattleFrontier_BattlePalaceLobby_EventScript_Attendant
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_DoublesAttendant::
+	lock
+	faceplayer
+	setvar VAR_FRONTIER_FACILITY, FRONTIER_FACILITY_PALACE
+	setvar VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES
+	goto BattleFrontier_BattlePalaceLobby_EventScript_Attendant
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_Attendant::
+	palace_get PALACE_DATA_PRIZE
+	goto_if_ne VAR_RESULT, ITEM_NONE, BattleFrontier_BattlePalaceLobby_EventScript_WonChallenge
+	special SavePlayerParty
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_SINGLES, BattleFrontier_BattlePalaceLobby_EventScript_WelcomeForSingleBattle
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES, BattleFrontier_BattlePalaceLobby_EventScript_WelcomeForDoubleBattle
+BattleFrontier_BattlePalaceLobby_EventScript_AskTakeChallenge::
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_SINGLES, BattleFrontier_BattlePalaceLobby_EventScript_AskTakeSingleBattleChallenge
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES, BattleFrontier_BattlePalaceLobby_EventScript_AskTakeDoubleBattleChallenge
+	waitmessage
+	multichoice 17, 6, MULTI_CHALLENGEINFO, FALSE
+	switch VAR_RESULT
+	case 0, BattleFrontier_BattlePalaceLobby_EventScript_TryEnterChallenge
+	case 1, BattleFrontier_BattlePalaceLobby_EventScript_ExplainChallenge
+	case 2, BattleFrontier_BattlePalaceLobby_EventScript_CancelChallenge
+	case MULTI_B_PRESSED, BattleFrontier_BattlePalaceLobby_EventScript_CancelChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_TryEnterChallenge::
+	message BattleFrontier_BattlePalaceLobby_Text_WhichChallenge
+	waitmessage
+	multichoice 17, 6, MULTI_LEVEL_MODE, FALSE
+	switch VAR_RESULT
+	case FRONTIER_LVL_TENT, BattleFrontier_BattlePalaceLobby_EventScript_CancelChallenge
+	case MULTI_B_PRESSED, BattleFrontier_BattlePalaceLobby_EventScript_CancelChallenge
+	frontier_checkineligible
+	goto_if_eq VAR_0x8004, TRUE, BattleFrontier_BattlePalaceLobby_EventScript_NotEnoughValidMons
+	frontier_set FRONTIER_DATA_LVL_MODE, VAR_RESULT
+	msgbox BattleFrontier_BattlePalaceLobby_Text_NowSelectThreeMons, MSGBOX_DEFAULT
+	fadescreen FADE_TO_BLACK
+	call BattleFrontier_EventScript_GetLvlMode
+	copyvar VAR_0x8004, VAR_RESULT
+	setvar VAR_0x8005, FRONTIER_PARTY_SIZE
+	special ChoosePartyForBattleFrontier
+	waitstate
+	goto_if_eq VAR_RESULT, 0, BattleFrontier_BattlePalaceLobby_EventScript_LoadPartyAndCancelChallenge
+	msgbox BattleFrontier_BattlePalaceLobby_Text_MustSaveBeforeChallenge2, MSGBOX_YESNO
+	switch VAR_RESULT
+	case NO, BattleFrontier_BattlePalaceLobby_EventScript_LoadPartyAndCancelChallenge
+	case YES, BattleFrontier_BattlePalaceLobby_EventScript_SaveBeforeChallenge
+	case MULTI_B_PRESSED, BattleFrontier_BattlePalaceLobby_EventScript_LoadPartyAndCancelChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_SaveBeforeChallenge::
+	setvar VAR_TEMP_CHALLENGE_STATUS, 0
+	frontier_set FRONTIER_DATA_SELECTED_MON_ORDER
+	palace_init
+	palace_set PALACE_DATA_WIN_STREAK_ACTIVE, TRUE
+	frontier_set FRONTIER_DATA_CHALLENGE_STATUS, CHALLENGE_STATUS_SAVING
+	frontier_set FRONTIER_DATA_PAUSED, FALSE
+	special LoadPlayerParty
+	closemessage
+	delay 2
+	call Common_EventScript_SaveGame
+	setvar VAR_TEMP_CHALLENGE_STATUS, 255
+	goto_if_eq VAR_RESULT, 0, BattleFrontier_BattlePalaceLobby_EventScript_CancelChallengeSaveFailed
+BattleFrontier_BattlePalaceLobby_EventScript_EnterChallenge::
+	special SavePlayerParty
+	frontier_setpartyorder FRONTIER_PARTY_SIZE
+	msgbox BattleFrontier_BattlePalaceLobby_Text_FollowMe, MSGBOX_DEFAULT
+	closemessage
+	call BattleFrontier_BattlePalaceLobby_EventScript_WalkToDoor
+	warp MAP_BATTLE_FRONTIER_BATTLE_PALACE_CORRIDOR, 8, 13
+	setvar VAR_TEMP_CHALLENGE_STATUS, 0
+	waitstate
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_ExplainChallenge::
+	goto_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES, BattleFrontier_BattlePalaceLobby_EventScript_ExplainDoublesChallenge
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainSingleBattleChallenge, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_AskTakeChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_ExplainDoublesChallenge::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainDoubleBattleChallenge, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_AskTakeChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_NotEnoughValidMons::
+	switch VAR_RESULT
+	case FRONTIER_LVL_50, BattleFrontier_BattlePalaceLobby_EventScript_NotEnoughValidMonsLv50
+	case FRONTIER_LVL_OPEN, BattleFrontier_BattlePalaceLobby_EventScript_NotEnoughValidMonsLvOpen
+
+BattleFrontier_BattlePalaceLobby_EventScript_NotEnoughValidMonsLv50::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_NotEnoughValidMonsLv50, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_EndCancelChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_NotEnoughValidMonsLvOpen::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_NotEnoughValidMonsLvOpen, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_EndCancelChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_CancelChallengeSaveFailed::
+	frontier_set FRONTIER_DATA_CHALLENGE_STATUS, 0
+	goto BattleFrontier_BattlePalaceLobby_EventScript_CancelChallenge
+
+BattleFrontier_BattlePalaceLobby_EventScript_LoadPartyAndCancelChallenge::
+	special LoadPlayerParty
+BattleFrontier_BattlePalaceLobby_EventScript_CancelChallenge::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ReturnWhenFortified, MSGBOX_DEFAULT
+BattleFrontier_BattlePalaceLobby_EventScript_EndCancelChallenge::
+	release
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_WelcomeForSingleBattle::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_WelcomeForSingleBattle, MSGBOX_DEFAULT
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_WelcomeForDoubleBattle::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_WelcomeForDoubleBattle, MSGBOX_DEFAULT
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_AskTakeSingleBattleChallenge::
+	message BattleFrontier_BattlePalaceLobby_Text_TakeSingleBattleChallenge
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_AskTakeDoubleBattleChallenge::
+	message BattleFrontier_BattlePalaceLobby_Text_TakeDoubleBattleChallenge
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_WalkToDoor::
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_SINGLES, BattleFrontier_BattlePalaceLobby_EventScript_TalkedToSinglesAttendant
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES, BattleFrontier_BattlePalaceLobby_EventScript_TalkedToDoublesAttendant
+	applymovement VAR_LAST_TALKED, BattleFrontier_BattlePalaceLobby_Movement_WalkToDoor
+	applymovement OBJ_EVENT_ID_PLAYER, BattleFrontier_BattlePalaceLobby_Movement_WalkToDoor
+	waitmovement 0
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_SINGLES, BattleFrontier_BattlePalaceLobby_EventScript_OpenSinglesHallDoor
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES, BattleFrontier_BattlePalaceLobby_EventScript_OpenDoublesHallDoor
+	waitdooranim
+	applymovement VAR_LAST_TALKED, BattleFrontier_BattlePalaceLobby_Movement_AttendantEnterDoor
+	applymovement OBJ_EVENT_ID_PLAYER, BattleFrontier_BattlePalaceLobby_Movement_PlayerEnterDoor
+	waitmovement 0
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_SINGLES, BattleFrontier_BattlePalaceLobby_EventScript_CloseSinglesHallDoor
+	call_if_eq VAR_FRONTIER_BATTLE_MODE, FRONTIER_MODE_DOUBLES, BattleFrontier_BattlePalaceLobby_EventScript_CloseDoublesHallDoor
+	waitdooranim
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_TalkedToSinglesAttendant::
+	setvar VAR_LAST_TALKED, LOCALID_ATTENDANT_SINGLES
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_TalkedToDoublesAttendant::
+	setvar VAR_LAST_TALKED, LOCALID_ATTENDANT_DOUBLES
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_OpenSinglesHallDoor::
+	opendoor 5, 4
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_OpenDoublesHallDoor::
+	opendoor 19, 4
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_CloseSinglesHallDoor::
+	closedoor 5, 4
+	return
+
+BattleFrontier_BattlePalaceLobby_EventScript_CloseDoublesHallDoor::
+	closedoor 19, 4
+	return
+
+BattleFrontier_BattlePalaceLobby_Movement_WalkToDoor:
+	walk_up
+	step_end
+
+BattleFrontier_BattlePalaceLobby_Movement_AttendantEnterDoor:
+	walk_up
+	set_invisible
+	step_end
+
+BattleFrontier_BattlePalaceLobby_Movement_PlayerEnterDoor:
+	walk_up
+	walk_up
+	set_invisible
+	step_end
+
+BattleFrontier_BattlePalaceLobby_EventScript_ShowSinglesResults::
+	lockall
+	frontier_results FRONTIER_FACILITY_PALACE, FRONTIER_MODE_SINGLES
+	waitbuttonpress
+	special RemoveRecordsWindow
+	releaseall
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_ShowDoublesResults::
+	lockall
+	frontier_results FRONTIER_FACILITY_PALACE, FRONTIER_MODE_DOUBLES
+	waitbuttonpress
+	special RemoveRecordsWindow
+	releaseall
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_BlackBelt::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_LadyCanTellWhatMonsThink, MSGBOX_NPC
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_Man::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_NatureAndMovesKeyHere, MSGBOX_NPC
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_Beauty::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_MonDocileButTransforms, MSGBOX_NPC
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_Maniac::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_WhatNatureFavorsChippingAway, MSGBOX_NPC
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_RulesBoard::
+	lockall
+	msgbox BattleFrontier_BattlePalaceLobby_Text_RulesAreListed, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard::
+	message BattleFrontier_BattlePalaceLobby_Text_ReadWhichHeading
+	waitmessage
+	multichoice 16, 0, MULTI_BATTLE_PALACE_RULES, FALSE
+	switch VAR_RESULT
+	case 0, BattleFrontier_BattlePalaceLobby_EventScript_RulesBasics
+	case 1, BattleFrontier_BattlePalaceLobby_EventScript_RulesNature
+	case 2, BattleFrontier_BattlePalaceLobby_EventScript_RulesMoves
+	case 3, BattleFrontier_BattlePalaceLobby_EventScript_RulesUnderpowered
+	case 4, BattleFrontier_BattlePalaceLobby_EventScript_RulesWhenInDanger
+	case 5, BattleFrontier_BattlePalaceLobby_EventScript_ExitRules
+	case MULTI_B_PRESSED, BattleFrontier_BattlePalaceLobby_EventScript_ExitRules
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_RulesBasics::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainRulesBasics, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_RulesNature::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainRulesNature, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_RulesMoves::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainRulesMoves, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_RulesUnderpowered::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainRulesUnderpowered, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_RulesWhenInDanger::
+	msgbox BattleFrontier_BattlePalaceLobby_Text_ExplainRulesWhenInDanger, MSGBOX_DEFAULT
+	goto BattleFrontier_BattlePalaceLobby_EventScript_ReadRulesBoard
+	end
+
+BattleFrontier_BattlePalaceLobby_EventScript_ExitRules::
+	releaseall
+	end
+
+BattleFrontier_BattlePalaceLobby_Text_WelcomeForSingleBattle:
+    .string "欢迎来到对战宫殿，\n这里是对训练师的\p心的测试，这里接受\p单人对战大厅\n的挑战。$"
+
+BattleFrontier_BattlePalaceLobby_Text_TakeSingleBattleChallenge:
+    .string "你想要挑战\n单人对战大厅吗？$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainSingleBattleChallenge:
+    .string "对战宫殿里有几个\n专门为单人对战准备的礼堂，\l被称作单人对战大厅。\p单人对战与普通比赛的规则\n相同，但增加了一条\l非常重要的规则，\p训练师只能选择\n进行战斗的宝可梦，\p不可以对宝可梦\n下达任何战斗指令。\p宝可梦要\n依靠自己的本能战斗，\p你必须信赖你的宝可梦，\n仔细观看它们的比赛。\p如果你能成功地连续打败\n七个训练师，\l就可以得到对战点数。\p需要中断挑战的话\n必须进行存档，\p假如没有存档\n则视为放弃参赛权。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ReturnWhenFortified:
+    .string "当你的心与你的宝可梦都变得\n更强的时候，再回到这里来吧。$"
+
+BattleFrontier_BattlePalaceLobby_Text_WhichChallenge:
+    .string "有两种对战大厅，\n50级和自由级，\l你要挑战哪一种？$"
+
+BattleFrontier_BattlePalaceLobby_Text_NotEnoughValidMonsLv50:
+    .string "哎…\p你没带足三只能够\n参加挑战的宝可梦，\p要进行挑战，你必须\n带着三只不同种类的宝可梦，\p而且它们必须都在\n50级以下。\p而且，也不能让它们携带\n相同种类的物品。\p蛋{STR_VAR_1}也不能参加。\p准备好之后\n再回来吧。$"
+
+BattleFrontier_BattlePalaceLobby_Text_NotEnoughValidMonsLvOpen:
+    .string "哎…\p你没带足三只能够\n参加挑战的宝可梦，\p要进行挑战，你必须\n带着三只不同种类的宝可梦。\p而且，也不能让它们携带\n相同种类的物品。\p蛋{STR_VAR_1}也不能参加。\p准备好之后\n再回来吧。$"
+
+BattleFrontier_BattlePalaceLobby_Text_NowSelectThreeMons:
+    .string "好的。现在，请选择\n要参加的三只宝可梦。$"
+
+BattleFrontier_BattlePalaceLobby_Text_MustSaveBeforeChallenge2:
+    .string "带你去对战大厅之前\n需要先存档，如何？$"
+
+BattleFrontier_BattlePalaceLobby_Text_FollowMe:
+    .string "好的。\n跟我来。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ResultsWillBeRecorded:
+    .string "很荣幸能观赏到\n你的宝可梦的英姿。\p正在记录你的结果中，\n请稍候。$"
+
+BattleFrontier_BattlePalaceLobby_Text_FirmTrueBondsFor7WinStreak:
+    .string "你达到了七连胜…\p看起来你的新与你的宝可梦的\n是紧紧地联系在一起的。$"
+
+BattleFrontier_BattlePalaceLobby_Text_FeatWillBeRecorded:
+    .string "正在记录你的成绩，\n请稍候。$"
+
+@ Unused
+BattleFrontier_BattlePalaceLobby_Text_BattlePointsFor7WinStreak:
+	.string "For the feat of your 7-win streak,\n"
+	.string "we present you with Battle Point(s).$"
+
+BattleFrontier_BattlePalaceLobby_Text_NoSpaceForPrize:
+    .string "看起来你没有地方\n装我们的礼品了，\p整理好背包再\n回来这里吧。$"
+
+BattleFrontier_BattlePalaceLobby_Text_WeHaveBeenWaiting:
+    .string "我们一直在等你…$"
+
+BattleFrontier_BattlePalaceLobby_Text_MustSaveBeforeChallenge:
+    .string "带你去对战大厅之前\n需要先存档，如何？$"
+
+BattleFrontier_BattlePalaceLobby_Text_FailedToSaveBeforeEndingChallenge:
+    .string "哎…\p上回结束挑战时\n你没有进行存档，\p因此你的挑战资格\n被暂时取消了。真可惜。$"
+
+@ Unused
+BattleFrontier_BattlePalaceLobby_Text_ReceivedPrize:
+    .string "{PLAYER}得到奖品\n{STR_VAR_1}。$"
+
+BattleFrontier_BattlePalaceLobby_Text_LadyCanTellWhatMonsThink:
+    .string "对于我这样努力的人，\n还是努力的宝可梦更适合我。\p攻击就是最好的防御！\n不断的攻击最为重要！\p不过我想说的并不是\n这些。\p我经常能看到一个可爱的\n女孩在这附近玩，\p她说她能得知\n宝可梦们的想法，\p那一点我不是很清楚，\n不过她真的非常可爱啊。\p嗯？\n你干吗用那种眼神看着我？$"
+
+BattleFrontier_BattlePalaceLobby_Text_NatureAndMovesKeyHere:
+    .string "唔…\p看起来宝可梦的性格\n和它们所学会的技能\l是在这里战斗的关键。\p准确地说，是取决于\n技能与宝可梦的性格的\l适合程度。\p如果你的宝可梦碰到麻烦，\n不能依靠它自己的潜能获胜，\l你就得检查一下\l它的技能是否符合它的性格。$"
+
+BattleFrontier_BattlePalaceLobby_Text_MonDocileButTransforms:
+    .string "我的宝可梦通常比较温顺，\p但进了对战大厅后，\n它有时会变得\l非常调皮！\p真是被它吓了一跳！\n非常让人吃惊啊！$"
+
+BattleFrontier_BattlePalaceLobby_Text_WhatNatureFavorsChippingAway:
+    .string "不知道一只喜欢吓唬对手，\n然后一点点打倒对方的宝可梦\l应该算作什么性格，\p它要是乐天的性格的话，\n我会大吃一惊的。\p但是，唉，不可能的。$"
+
+BattleFrontier_BattlePalaceLobby_Text_WelcomeForDoubleBattle:
+    .string "欢迎来到对战宫殿，\n这里是对训练师的心的测试，\p这里接受\p双打对战大厅\n的挑战。$"
+
+BattleFrontier_BattlePalaceLobby_Text_TakeDoubleBattleChallenge:
+    .string "你想要挑战\n双打对战大厅吗？$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainDoubleBattleChallenge:
+    .string "对战宫殿里有几个\n专门为双打对战准备的礼堂，\l被称作双打对战大厅。\p双打对战与普通比赛的规则\n相同，但增加了一条\l非常重要的规则，\p训练师只能选择\n进行战斗的宝可梦，\p不可以对宝可梦\n下达任何战斗指令。\p宝可梦要\n依靠自己的本能战斗，\p你必须信赖你的宝可梦，\n仔细观看它们的比赛。\p如果你能成功地连续打败\n七个训练师，\l就可以得到对战点数。\p需要中断挑战的话\n必须进行存档，\p假如没有存档\n则视为放弃参赛权。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ToDefeatMavenAnd7Trainers:
+    .string "要连续打败殿主\n和七个训练师啊…$"
+
+BattleFrontier_BattlePalaceLobby_Text_PresentYouWithBattlePoints:
+    .string "为了表彰你和你的宝可梦\n之间密切的关系，我们把\l这些对战点数奖给你。$"
+
+BattleFrontier_BattlePalaceLobby_Text_LikeToRecordMatch:
+    .string "你要在你的开拓区通行证上\n记录下你在对战宫殿\l最近的比赛吗？$"
+
+BattleFrontier_BattlePalaceLobby_Text_RulesAreListed:
+    .string "上面写着对战大厅的规则。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ReadWhichHeading:
+    .string "想读哪一条？$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainRulesBasics:
+    .string "在这里，宝可梦需要\n凭借自己的思考来战斗。\p与野生宝可梦相比，和人们\n一同生活的宝可梦会依据\l它们的性格选择不同的战斗方式。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainRulesNature:
+    .string "由于性格的差别，有的宝可梦\n喜欢不计后果的攻击，\p有的喜欢尽量保护自己\n不受任何伤害，\p还有一些喜欢慢慢地\n挫败它的敌人。\p不同性格的宝可梦\n都会有各自喜欢的\l并且擅长的技能，\p当然也会有\n不喜欢的技能。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainRulesMoves:
+    .string "有直接给予对手伤害的\n攻击性技能，\p有抵抗敌人攻击或\n回复HP等等的\l防御性技能，\p还有能让对手陷入\n中毒或麻痹等\l种种异常状态的\l奇怪的技能。\p宝可梦会自己决定\n使用三种技能中的哪一种。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainRulesUnderpowered:
+    .string "没有训练师的命令，\n宝可梦有可能并不会\l经常使用某些技能。\p宝可梦不擅长使用\n自己不喜欢的技能。\p如果宝可梦只会\n不太符合它的性格的技能，\l那么就很难凭自己的潜能获得胜利。$"
+
+BattleFrontier_BattlePalaceLobby_Text_ExplainRulesWhenInDanger:
+    .string "根据性格的不同，如果一只宝可梦\n遇上了麻烦，它也有可能\l会使用并不符合它性格的技能。\p如果紧要关头宝可梦的表现\n开始变得奇怪，就要多注意它一下了。$"
+
