@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Pokeemerald
-          path: pokeemerald.gba
+          path: 永恒纪元.gba
