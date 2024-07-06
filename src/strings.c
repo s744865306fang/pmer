@@ -737,6 +737,7 @@ const u8 gText_AboutG_Mode[] = _("关于G-模式");
 const u8 gText_E_Mode[] = _("E-模式");
 const u8 gText_G_Mode[] = _("G-模式");
 const u8 gText_MenuOptionPokedex[] = _("图鉴");
+const u8 gText_MenuPC[] = _("电脑");
 const u8 gText_MenuOptionPokemon[] = _("宝可梦");
 const u8 gText_MenuOptionBag[] = _("背包");
 const u8 gText_MenuOptionPokenav[] = _("领航员");
