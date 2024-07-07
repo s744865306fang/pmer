@@ -980,7 +980,8 @@ static void CB2_GiveStarter(void)
 {
     u16 starterMon;
 
-    *GetVarPointer(VAR_STARTER_MON) = gSpecialVar_Result;
+    *GetVarPointer(VAR_STARTER_MON) = gSpecialVar_Result%3;
+    *GetVarPointer(VAR_STARTER_PAGE) = (u16)(gSpecialVar_Result/3);
     starterMon = GetStarterPokemon(gSpecialVar_Result);
     ScriptGiveMon(starterMon, 5, ITEM_NONE, 0, 0, 0);
     ResetTasks();

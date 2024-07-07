@@ -540,6 +540,7 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
 static bool32 InitStartMenuStep(void)
 {
     s8 state = sInitStartMenuData[0];
+    u8 tmp = 0;
 
     switch (state)
     {
@@ -569,11 +570,11 @@ static bool32 InitStartMenuStep(void)
         if (PrintStartMenuActions(&sInitStartMenuData[1], 2))
         {
             gMultiuseListMenuTemplate.totalItems = sNumStartMenuActions;
-            //If you add a new option and find bug, please modify here
-            if(sStartMenuCursorPos < 5)
-                gTasks[startMenuTaskId].data[5] = ListMenuInit(&gMultiuseListMenuTemplate, 0, sStartMenuCursorPos);
+            if(sNumStartMenuActions <= 7)
+                tmp = 0;
             else
-                gTasks[startMenuTaskId].data[5] = ListMenuInit(&gMultiuseListMenuTemplate, 1, sStartMenuCursorPos - 1);
+                tmp = sNumStartMenuActions - 7;
+            gTasks[startMenuTaskId].data[5] = ListMenuInit(&gMultiuseListMenuTemplate, tmp, sStartMenuCursorPos);
             sInitStartMenuData[0]++;
         }
         break;
@@ -690,9 +691,7 @@ static bool8 HandleStartMenuInput(void)
 
     if (JOY_NEW(START_BUTTON | B_BUTTON))
     {
-        RemoveExtraStartMenuWindows();
-        HideStartMenu();
-        return TRUE;
+        return StartMenuExitCallback();
     }
 
     return FALSE;
