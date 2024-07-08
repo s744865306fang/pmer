@@ -18,6 +18,14 @@ enum {
     PALTAG_WEATHER = TAG_WEATHER_START,
     PALTAG_WEATHER_2
 };
+enum
+{
+    COLOR_MAP_NONE,
+    COLOR_MAP_DARK_CONTRAST,
+    COLOR_MAP_CONTRAST,
+};
+
+void UpdatePaletteGammaType(u8 index, u8 gammaType);
 
 #define NUM_WEATHER_COLOR_MAPS 19
 
@@ -144,6 +152,7 @@ extern const u16 gFogPalette[];
 // field_weather_effect.c
 extern const u8 gWeatherFogHorizontalTiles[];
 
+void InitPaletteColorMapTypes(void);
 void StartWeather(void);
 void SetNextWeather(u8 weather);
 void SetCurrentAndNextWeather(u8 weather);
@@ -154,7 +163,7 @@ void FadeScreen(u8 mode, s8 delay);
 bool8 IsWeatherNotFadingIn(void);
 void UpdateSpritePaletteWithWeather(u8 spritePaletteIndex);
 void ApplyWeatherColorMapToPal(u8 paletteIndex);
-void LoadCustomWeatherSpritePalette(const u16 *palette);
+void LoadCustomWeatherSpritePalette(const struct SpritePalette *palette);
 void ResetDroughtWeatherPaletteLoading(void);
 bool8 LoadDroughtWeatherPalettes(void);
 void DroughtStateInit(void);
