@@ -853,7 +853,7 @@ gText_SandstormIsVicious:
     .string "沙暴太强了，\n走不过去。$"
 
 gText_SelectWithoutRegisteredItem:
-    .string "背包里的物品可以\n登录到SELECT上，方便使用。$"
+    .string "背包里的物品可以\n登录四个到SELECT上，方便使用。$"
 
 gText_PokemonTrainerSchoolEmail:
     .string "有一封宝可梦训练师\n学校来的电子邮件。\p… … … … … …\p一只宝可梦最多可以学4个技能，\p训练师的专业程度就可以从其\n为宝可梦所选择的技能中看出来。\p… … … … … …$"

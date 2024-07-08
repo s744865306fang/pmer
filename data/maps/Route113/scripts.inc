@@ -146,7 +146,7 @@ Route113_Text_RouteSignFallarbor:
     .string "113号公路\n{LEFT_ARROW}秋叶镇$"
 
 Route113_Text_TrainerTipsRegisterKeyItems:
-    .string "训练师小技巧\p可以将背包中的某个重要物品\n登录到SELECT键上，\p按下SELECT键就可以\n方便地使用登录的物品了。$"
+    .string "训练师小技巧\p可以将背包中的四个重要物品\n登录到SELECT键上，\p按下SELECT键就可以\n方便地使用登录的物品了。$"
 
 Route113_Text_GlassWorkshopSign:
     .string "玻璃制造工作室\n“将火山灰变成玻璃”$"

@@ -527,6 +527,8 @@ extern const u8 gText_Dash[];
 extern const u8 gText_Plus[];
 extern const u8 gText_Nickname[];
 
+extern const u8 gText_PressAnyDpadKey[];
+
 //pokedex text
 extern const u8 gText_CryOf[];
 extern const u8 gText_SizeComparedTo[];
