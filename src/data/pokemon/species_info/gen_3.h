@@ -3429,7 +3429,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
         .abilities = { ABILITY_NATURAL_CURE, ABILITY_POISON_POINT, ABILITY_LEAF_GUARD },
         .bodyColor = BODY_COLOR_GREEN,
         .noFlip = TRUE,
-        .speciesName = _("花苞"),
+        .speciesName = _("含羞苞"),
         .cryId = CRY_BUDEW,
         .natDexNum = NATIONAL_DEX_BUDEW,
         .categoryName = _("花苞"),
@@ -4209,7 +4209,7 @@ const struct SpeciesInfo gSpeciesInfoGen3[] =
         #endif
         .abilities = { ABILITY_HYPER_CUTTER, ABILITY_ARENA_TRAP, ABILITY_SHEER_FORCE },
         .bodyColor = BODY_COLOR_BROWN,
-        .speciesName = _("陷阱"),
+        .speciesName = _("大颚蚁"),
         .cryId = CRY_TRAPINCH,
         .natDexNum = NATIONAL_DEX_TRAPINCH,
         .categoryName = _("狮蚁"),

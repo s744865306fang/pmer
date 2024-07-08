@@ -4451,7 +4451,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
         .eggGroups = { EGG_GROUP_WATER_1, EGG_GROUP_FLYING },
         .abilities = { ABILITY_KEEN_EYE, ABILITY_BIG_PECKS, ABILITY_HYDRATION },
         .bodyColor = BODY_COLOR_BLUE,
-        .speciesName = _("鸭"),
+        .speciesName = _("鸭宝宝"),
         .cryId = CRY_DUCKLETT,
         .natDexNum = NATIONAL_DEX_DUCKLETT,
         .categoryName = _("水鸟"),
@@ -5800,7 +5800,7 @@ const struct SpeciesInfo gSpeciesInfoGen5[] =
             .abilities = { ABILITY_FLASH_FIRE, ABILITY_FLAME_BODY, ABILITY_SHADOW_TAG },
         #endif
         .bodyColor = BODY_COLOR_BLACK,
-        .speciesName = _("油灯"),
+        .speciesName = _("灯火幽灵"),
         .cryId = CRY_LAMPENT,
         .natDexNum = NATIONAL_DEX_LAMPENT,
         .categoryName = _("油灯"),
