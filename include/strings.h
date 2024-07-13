@@ -526,6 +526,8 @@ extern const u8 gText_Speed[];
 extern const u8 gText_Dash[];
 extern const u8 gText_Plus[];
 extern const u8 gText_Nickname[];
+extern const u8 gText_Follower[];
+extern const u8 gText_Unfollow[];
 
 extern const u8 gText_PressAnyDpadKey[];
 

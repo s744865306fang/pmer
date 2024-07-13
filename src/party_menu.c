@@ -75,9 +75,12 @@
 #include "constants/party_menu.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "constants/follow_me.h"
 
 enum {
     MENU_SUMMARY,
+    MENU_FOLLOW,
+    MENU_UNFOLLOW,
     MENU_NICKNAME,
     MENU_SWITCH,
     MENU_CANCEL1,
@@ -208,7 +211,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[9];
+    u8 actions[10];
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -249,6 +252,7 @@ static EWRAM_DATA u8 sFinalLevel = 0;
 // IWRAM common
 void (*gItemUseCB)(u8, TaskFunc);
 
+static void CursorCb_Unfollow(u8);
 static void DrawEmptySlot_Equal(u8 windowId);
 static void BlitBitmapToPartyWindow_Equal(u8, u8, u8, u8, u8, u8);
 static void ResetPartyMenu(void);
@@ -262,6 +266,7 @@ static bool8 AllocPartyMenuBg(void);
 static bool8 AllocPartyMenuBgGfx(void);
 static void InitPartyMenuWindows(u8);
 static void LoadPartyMenuWindows(void);
+static void CursorCb_Follower(u8);
 static void CursorCb_Nickname(u8);
 static void InitPartyMenuBoxes(u8);
 static void LoadPartyMenuBoxes(u8);
@@ -2890,11 +2895,43 @@ static void ChangePokemonNicknamePartyScreen(void)
     DoNamingScreen(NAMING_SCREEN_NICKNAME, gStringVar2, GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES, NULL), GetMonGender(&gPlayerParty[gSpecialVar_0x8004]), GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_PERSONALITY, NULL), ChangePokemonNicknamePartyScreen_CB);
 }
 
+static void CursorCb_Follower(u8 taskId)
+{
+    u8 eventObjId;
+    PlaySE(SE_SELECT);
+    for (eventObjId = 0; eventObjId < OBJECT_EVENTS_COUNT; eventObjId++) //For each NPC on the map
+    {
+        if (gObjectEvents[eventObjId].active || gObjectEvents[eventObjId].isPlayer)
+            continue;
+        gSaveBlock2Ptr->follower.inProgress = TRUE;
+        gSaveBlock2Ptr->follower.graphicsId = 0; //暂时这样
+        gSaveBlock2Ptr->follower.flag = 0;
+        gSaveBlock2Ptr->follower.flags = 0x100;
+        gSaveBlock2Ptr->follower.createSurfBlob = 0;
+        gSaveBlock2Ptr->follower.comeOutDoorStairs = 0;
+        gSaveBlock2Ptr->follower.map.id = 0;
+        gSaveBlock2Ptr->follower.map.number = 0;
+        gSaveBlock2Ptr->follower.map.group = 33;
+        gSaveBlock2Ptr->follower.objId = eventObjId;
+        gSaveBlock2Ptr->follower.script = (const u8 *)ReadWord(0);
+        gObjectEvents[gSaveBlock2Ptr->follower.objId].invisible = FALSE;
+    }
+    CreateFollowerAvatar();
+    Task_ClosePartyMenu(taskId);
+}
+
 static void CursorCb_Nickname(u8 taskId)
 {
     PlaySE(SE_SELECT);
     gSpecialVar_0x8004 = gPartyMenu.slotId;
     sPartyMenuInternal->exitCallback = ChangePokemonNicknamePartyScreen;
+    Task_ClosePartyMenu(taskId);
+}
+
+static void CursorCb_Unfollow(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+    DestroyFollower();
     Task_ClosePartyMenu(taskId);
 }
 
@@ -2906,6 +2943,10 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
     if (!IsTradedMon(&mons[slotId]))
         AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_NICKNAME);
+    if(!(gSaveBlock2Ptr->follower.inProgress))
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_FOLLOW);
+    else
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_UNFOLLOW);
 
     // Add field moves to action list
     for (i = 0; i < MAX_MON_MOVES; i++)
