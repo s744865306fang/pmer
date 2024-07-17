@@ -76,6 +76,7 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "constants/follow_me.h"
+#include "constants/event_objects.h"
 
 enum {
     MENU_SUMMARY,
@@ -2898,13 +2899,25 @@ static void ChangePokemonNicknamePartyScreen(void)
 static void CursorCb_Follower(u8 taskId)
 {
     u8 eventObjId;
+    u16 gfxId;
+    u16 species;
     PlaySE(SE_SELECT);
+    if(GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_IS_EGG))
+    {
+        StringExpandPlaceholders(gStringVar4, gText_CantFollow);
+        return;
+    }
+    species = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_SPECIES);
+    if(species > 904)
+        gfxId = OBJ_EVENT_GFX_POKEMON_000;
+    else
+        gfxId = species+OBJ_EVENT_GFX_POKEMON_000;
     for (eventObjId = 0; eventObjId < OBJECT_EVENTS_COUNT; eventObjId++) //For each NPC on the map
     {
         if (gObjectEvents[eventObjId].active || gObjectEvents[eventObjId].isPlayer)
             continue;
         gSaveBlock2Ptr->follower.inProgress = TRUE;
-        gSaveBlock2Ptr->follower.graphicsId = 0; //暂时这样
+        gSaveBlock2Ptr->follower.graphicsId = gfxId;
         gSaveBlock2Ptr->follower.flag = 0;
         gSaveBlock2Ptr->follower.flags = 0x100;
         gSaveBlock2Ptr->follower.createSurfBlob = 0;
