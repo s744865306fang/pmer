@@ -2032,14 +2032,14 @@ static void DrawTextEntry(void)
 			temp[0] = sNamingScreen->textBuffer[i++];
 			temp[1] = sNamingScreen->textBuffer[i];
 			temp[2] = 0xFF;
-            AddTextPrinterParameterized3(sNamingScreen->windows[WIN_TEXT_ENTRY], 1,  (i - 1) * 8 + x, 1, sKeyboardTextColors, 0xFF, temp);
+            AddTextPrinterParameterized3(sNamingScreen->windows[WIN_TEXT_ENTRY], 1,  (i - 1) * 6 + x, 1, sKeyboardTextColors, 0xFF, temp);
 		}
 		else
 		{
 			temp[0] = sNamingScreen->textBuffer[i];
 			temp[1] = 0xFF;
 			temp[2] = 0xFF;
-            AddTextPrinterParameterized3(sNamingScreen->windows[WIN_TEXT_ENTRY], 1,  i * 8 + x, 1, sKeyboardTextColors, 0xFF, temp);
+            AddTextPrinterParameterized3(sNamingScreen->windows[WIN_TEXT_ENTRY], 1,  i * 6 + x, 1, sKeyboardTextColors, 0xFF, temp);
 		}
     }
 	
@@ -2145,7 +2145,7 @@ static void NamingScreen_ShowBgs(void)
 static const struct NamingScreenTemplate sPlayerNamingScreenTemplate =
 {
     .copyExistingString = FALSE,
-    .maxChars = 7,
+    .maxChars = 8,
     .iconFunction = 1,
     .addGenderIcon = FALSE,
     .initialPage = KBPAGE_LETTERS_CH,
