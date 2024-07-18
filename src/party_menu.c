@@ -6647,11 +6647,7 @@ void TryItemHoldFormChange(struct Pokemon *mon)
 const u8* GetItemEffect(u16 item)
 {
     if (item == ITEM_ENIGMA_BERRY_E_READER)
-        #ifndef FREE_ENIGMA_BERRY
-        return gSaveBlock1Ptr->enigmaBerry.holdEffect;
-        #else
-        return 0;
-        #endif
+        return gSaveBlock1Ptr->enigmaBerry.itemEffect;
     else
         return gItemEffectTable[item];
 }
