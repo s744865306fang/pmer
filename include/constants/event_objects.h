@@ -240,8 +240,7 @@
 #define OBJ_EVENT_GFX_LINK_RS_MAY                236
 #define OBJ_EVENT_GFX_LUGIA                      237
 #define OBJ_EVENT_GFX_HOOH                       238
-#define OBJ_EVENT_GFX_POKEMON_000			 	 239
-#define NUM_REGULAR_OBJ_EVENT_GFX                240
+#define NUM_REGULAR_OBJ_EVENT_GFX_1                239
 
 // NOTE: By default, the max value for NUM_OBJ_EVENT_GFX is 239.
 //
@@ -258,7 +257,7 @@
 // These are dynamic object gfx ids.
 // They correspond with the values of the VAR_OBJ_GFX_ID_X vars.
 // More info about them in include/constants/vars.h
-#define OBJ_EVENT_GFX_VARS   (NUM_OBJ_EVENT_GFX + 1)
+#define OBJ_EVENT_GFX_VARS   (NUM_REGULAR_OBJ_EVENT_GFX_1 + 1)
 #define OBJ_EVENT_GFX_VAR_0  (OBJ_EVENT_GFX_VARS + 0x0) // 240
 #define OBJ_EVENT_GFX_VAR_1  (OBJ_EVENT_GFX_VARS + 0x1)
 #define OBJ_EVENT_GFX_VAR_2  (OBJ_EVENT_GFX_VARS + 0x2)
@@ -275,6 +274,8 @@
 #define OBJ_EVENT_GFX_VAR_D  (OBJ_EVENT_GFX_VARS + 0xD)
 #define OBJ_EVENT_GFX_VAR_E  (OBJ_EVENT_GFX_VARS + 0xE)
 #define OBJ_EVENT_GFX_VAR_F  (OBJ_EVENT_GFX_VARS + 0xF) // 255
+#define OBJ_EVENT_GFX_POKEMON_000			 	 257
+#define NUM_REGULAR_OBJ_EVENT_GFX 258
 
 #define SHADOW_SIZE_S   0
 #define SHADOW_SIZE_M   1
