@@ -2898,15 +2898,12 @@ static void ChangePokemonNicknamePartyScreen(void)
 
 static void CursorCb_Follower(u8 taskId)
 {
-    u8 eventObjId;
+    /*u8 eventObjId;
     u16 gfxId;
     u16 species;
     PlaySE(SE_SELECT);
     if(GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_IS_EGG))
-    {
-        StringExpandPlaceholders(gStringVar4, gText_CantFollow);
         return;
-    }
     species = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_SPECIES);
     if(species > 904)
         gfxId = OBJ_EVENT_GFX_POKEMON_000;
@@ -2930,7 +2927,8 @@ static void CursorCb_Follower(u8 taskId)
         gObjectEvents[gSaveBlock2Ptr->follower.objId].invisible = FALSE;
     }
     CreateFollowerAvatar();
-    Task_ClosePartyMenu(taskId);
+    Task_ClosePartyMenu(taskId);*/
+    return;
 }
 
 static void CursorCb_Nickname(u8 taskId)

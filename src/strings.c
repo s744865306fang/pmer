@@ -379,6 +379,7 @@ const u8 gText_SpAtk3[] = _("特攻");
 const u8 gText_SpDef3[] = _("特防");
 const u8 gText_WontHaveEffect[] = _("没有任何效果。{PAUSE_UNTIL_PRESS}");
 const u8 gText_CantFollow[] = _("蛋无法跟随。{PAUSE_UNTIL_PRESS}");
+const u8 gText_StopUseFollow[] = _("由于bug过多，暂时移除该功能{PAUSE_UNTIL_PRESS}");
 const u8 gText_NextFusionMon[] = _("Choose {PKMN} to fuse with.");
 const u8 gText_CantBeUsedOnPkmn[] = _("这个不能对\n那个宝可梦使用。{PAUSE_UNTIL_PRESS}");
 const u8 gText_PkmnCantSwitchOut[] = _("{STR_VAR_1}不能\n交换！{PAUSE_UNTIL_PRESS}");

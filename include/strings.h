@@ -529,7 +529,7 @@ extern const u8 gText_Nickname[];
 extern const u8 gText_Follower[];
 extern const u8 gText_Unfollow[];
 extern const u8 gText_CantFollow[];
-
+extern const u8 gText_StopUseFollow[];
 extern const u8 gText_PressAnyDpadKey[];
 
 //pokedex text
