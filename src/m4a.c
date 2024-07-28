@@ -6,7 +6,22 @@ extern const u8 gCgb3Vol[];
 
 #define BSS_CODE __attribute__((section(".bss.code")))
 
-BSS_CODE ALIGNED(4) char SoundMainRAM_Buffer[0x800] = {0};
+#define AUDIO_5734HZ 0x60
+#define AUDIO_10512HZ 0xB0
+#define AUDIO_13379HZ 0xE0 //pokeemerald default
+#define AUDIO_15768HZ 0x108
+#define AUDIO_18157HZ 0x130
+#define AUDIO_21024HZ 0x160
+#define AUDIO_26758HZ 0x1C0
+#define AUDIO_31536HZ 0x210
+#define AUDIO_36314HZ 0x260
+#define AUDIO_40137HZ 0x2A0
+#define AUDIO_42048HZ 0x2C0
+
+#define AUDIO_SIZE AUDIO_26758HZ
+
+BSS_CODE ALIGNED(4) char SoundMainRAM_Buffer[0xB40] = {0};
+BSS_CODE ALIGNED(4) u32 hq_buffer_ptr[AUDIO_SIZE] = {0};
 
 struct SoundInfo gSoundInfo;
 struct PokemonCrySong gPokemonCrySongs[MAX_POKEMON_CRIES];
