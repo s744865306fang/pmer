@@ -2889,6 +2889,8 @@ void RemoveBattleMonPPBonus(struct BattlePokemon *mon, u8 moveIndex)
     mon->ppBonuses &= gPPUpClearMask[moveIndex];
 }
 
+EWRAM_DATA bool8 _resetStats = TRUE;
+
 void PokemonToBattleMon(struct Pokemon *src, struct BattlePokemon *dst)
 {
     s32 i;
@@ -2931,14 +2933,19 @@ void PokemonToBattleMon(struct Pokemon *src, struct BattlePokemon *dst)
     StringCopy_Nickname(dst->nickname, nickname);
     GetMonData(src, MON_DATA_OT_NAME, dst->otName);
 
-    for (i = 0; i < NUM_BATTLE_STATS; i++)
-        dst->statStages[i] = DEFAULT_STAT_STAGE;
+    if(_resetStats)
+    {
+        for (i = 0; i < NUM_BATTLE_STATS; i++)
+            dst->statStages[i] = DEFAULT_STAT_STAGE;
 
-    dst->status2 = 0;
+        dst->status2 = 0;
+    }
+    _resetStats = TRUE;
 }
 
-void CopyPlayerPartyMonToBattleData(u8 battlerId, u8 partyIndex)
+void CopyPlayerPartyMonToBattleData(u8 battlerId, u8 partyIndex, bool8 resetStats)
 {
+    _resetStats = resetStats;
     PokemonToBattleMon(&gPlayerParty[partyIndex], &gBattleMons[battlerId]);
     gBattleStruct->hpOnSwitchout[GetBattlerSide(battlerId)] = gBattleMons[battlerId].hp;
     UpdateSentPokesToOpponentValue(battlerId);
