@@ -913,6 +913,10 @@ gText_PlayerFoundOneTMHM:
 
 gText_Sudowoodo_Attacked:
     .string "奇怪的树不喜欢\n吼吼鲸洒水壶！\p奇怪的树攻了上来！$"
+	
+gText_PlayerFoundTMHMs::
+	.string "{PLAYER} found {STR_VAR_3} {STR_VAR_1}\n"
+	.string "{STR_VAR_2}!$"
 
 gText_LegendaryFlewAway:
     .string "{STR_VAR_1}飘走了！$"

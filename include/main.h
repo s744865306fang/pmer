@@ -73,5 +73,6 @@ void RestoreSerialTimer3IntrHandlers(void);
 void StartTimer1(void);
 void SeedRngAndSetTrainerId(void);
 u16 GetGeneratedTrainerIdLower(void);
+u16 AddWindowParameterized(u8, u8, u8, u8, u8, u8, u16);
 
 #endif // GUARD_MAIN_H

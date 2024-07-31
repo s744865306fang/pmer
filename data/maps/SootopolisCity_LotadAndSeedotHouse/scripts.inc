@@ -109,6 +109,7 @@ SootopolisCity_LotadAndSeedotHouse_Text_PleaseShowMeBigSeedot:
 SootopolisCity_LotadAndSeedotHouse_Text_GoshMightBeBiggerThanLotad:
     .string "{STR_VAR_2}厘米！\n啊呀，真大！\p它肯定比弟弟见过的\n大莲叶童子还要大！\p谢谢你给我看，\n这是我的谢礼！$"
 
+
 @ Unused
 SootopolisCity_LotadAndSeedotHouse_Text_ReceivedPotion1:
     .string "{PLAYER}收到了药水。$"

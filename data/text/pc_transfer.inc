@@ -5,10 +5,10 @@ gText_PkmnTransferredLanettesPC::
     .string "{STR_VAR_2}传到了\n真弓的电脑上，\p放在盒子\n“{STR_VAR_1}”里。$"
 
 gText_PkmnTransferredSomeonesPCBoxFull::
-    .string "某人的电脑上盒子“{STR_VAR_3}”\n已经满了，\p{STR_VAR_2}传到了\n盒子“{STR_VAR_1}”里。$"
+	.string "某人的电脑上盒子“{STR_VAR_3}”\n已经满了，\p{STR_VAR_2}传到了\n盒子“{STR_VAR_1}”里。$"
 
 gText_PkmnTransferredLanettesPCBoxFull::
-    .string "真弓的电脑上盒子“{STR_VAR_3}”\n已经满了，\p{STR_VAR_2}传到了\n盒子“{STR_VAR_1}”里。$"
+	.string "真弓的电脑上盒子“{STR_VAR_3}”\n已经满了，\p{STR_VAR_2}传到了\n盒子“{STR_VAR_1}”里。$"
 
 gText_NoMoreRoomForPokemon::
     .string "没有地方装宝可梦了！\p宝可梦盒子都满了，\n再也挤不进什么了！$"

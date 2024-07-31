@@ -24,3 +24,9 @@ gText_NoRoomLeftForAnother::
 
 gText_TheDecorWasTransferredToThePC::
     .string "{STR_VAR_2}传进了\n电脑里。$"
+
+gText_ObtainedTheItems::
+	.string "获得了 {STR_VAR_1} {STR_VAR_2}!$"
+
+gText_PlayerFoundItems::
+	.string "{PLAYER}找到了{STR_VAR_1} {STR_VAR_2}!$"

@@ -611,3 +611,4 @@ gText_ToughMove::
 
 gText_3QuestionMarks::
     .string "？？？$"
+

@@ -9,13 +9,12 @@
 #include "item_menu.h"
 #include "main.h"
 #include "random.h"
+#include "script_pokemon_util.h"
 #include "string_util.h"
 #include "text.h"
 #include "constants/event_object_movement.h"
 #include "constants/items.h"
 
-static u32 GetEnigmaBerryChecksum(struct EnigmaBerry *enigmaBerry);
-static bool32 BerryTreeGrow(struct BerryTree *tree);
 static u16 BerryTypeToItemId(u16 berry);
 static u8 BerryTreeGetNumStagesWatered(struct BerryTree *tree);
 static u8 GetNumStagesWateredByBerryTreeId(u8 id);
@@ -23,1242 +22,1599 @@ static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water);
 static u8 CalcBerryYield(struct BerryTree *tree);
 static u8 GetBerryCountByBerryTreeId(u8 id);
 static u16 GetStageDurationByBerryType(u8);
+static u8 GetDrainRateByBerryType(u8);
+static u8 GetWaterBonusByBerryType(u8);
+static u8 GetWeedingBonusByBerryType(u8);
+static u8 GetPestsBonusByBerryType(u8);
+static void SetTreeMutations(u8 id, u8 berry);
+static u8 GetTreeMutationValue(u8 id);
+static u16 GetBerryPestSpecies(u8 berryId);
+static void TryForWeeds(struct BerryTree *tree);
+static void TryForPests(struct BerryTree *tree);
+static void AddTreeBonus(struct BerryTree *tree, u8 bonus);
 
-//.rodata
-static const u8 sBerryDescriptionPart1_Cheri[] = _("会开出美丽的花");
-static const u8 sBerryDescriptionPart2_Cheri[] = _("鲜红的果实十分辛辣");
-static const u8 sBerryDescriptionPart1_Chesto[] = _("不管是哪都非常坚硬");
-static const u8 sBerryDescriptionPart2_Chesto[] = _("不管是哪都很涩");
-static const u8 sBerryDescriptionPart1_Pecha[] = _("非常香甜可口");
-static const u8 sBerryDescriptionPart2_Pecha[] = _("由于十分柔软，在运送的时候要小心.");
-static const u8 sBerryDescriptionPart1_Rawst[] = _("树叶部分较长且卷曲着的话");
-static const u8 sBerryDescriptionPart2_Rawst[] = _("果子似乎会很苦");
-static const u8 sBerryDescriptionPart1_Aspear[] = _("坚硬的果实里含有非常丰富的");
-static const u8 sBerryDescriptionPart2_Aspear[] = _("水分，味道相当酸");
-static const u8 sBerryDescriptionPart1_Leppa[] = _("跟樱子果之类的树果相比，培育速度较为缓慢");
-static const u8 sBerryDescriptionPart2_Leppa[] = _("越小的果实口味越佳");
-static const u8 sBerryDescriptionPart1_Oran[] = _("混杂着各种滋味的奇妙树果");
-static const u8 sBerryDescriptionPart2_Oran[] = _("只需半天就能结果.");
-static const u8 sBerryDescriptionPart1_Persim[] = _("最喜欢晒太阳，只要晒到阳光");
-static const u8 sBerryDescriptionPart2_Persim[] = _("就会变得越来越鲜艳。");
-static const u8 sBerryDescriptionPart1_Lum[] = _("虽然需要长时间来成熟，但是细心照料的话");
-static const u8 sBerryDescriptionPart2_Lum[] = _("有时也能结出2个果实");
-static const u8 sBerryDescriptionPart1_Sitrus[] = _("与橙橙果之间宛如兄弟一样，大小虽然变大了");
-static const u8 sBerryDescriptionPart2_Sitrus[] = _("味道仍十分接近");
-static const u8 sBerryDescriptionPart1_Figy[] = _("外观如同被吃过的样子");
-static const u8 sBerryDescriptionPart2_Figy[] = _("内部富含辛辣的成分");
-static const u8 sBerryDescriptionPart1_Wiki[] = _("据说外层有凸起的颗粒");
-static const u8 sBerryDescriptionPart2_Wiki[] = _("是为了方便宝可梦携带");
-static const u8 sBerryDescriptionPart1_Mago[] = _("长得越大果实越卷曲.");
-static const u8 sBerryDescriptionPart2_Mago[] = _("越卷曲的果实越甜，越好吃");
-static const u8 sBerryDescriptionPart1_Aguav[] = _("长有娇小花朵，不需要阳光");
-static const u8 sBerryDescriptionPart2_Aguav[] = _("也能生长的稀有树果");
-static const u8 sBerryDescriptionPart1_Iapapa[] = _("这种树果又大又酸");
-static const u8 sBerryDescriptionPart2_Iapapa[] = _("培育时间最短也要花上半天");
-static const u8 sBerryDescriptionPart1_Razz[] = _("红色的果实吃下时会有一点辣味");
-static const u8 sBerryDescriptionPart2_Razz[] = _("培育速度很快，只要4小时就能结果");
-static const u8 sBerryDescriptionPart1_Bluk[] = _("虽然外皮是蓝色的，但是咬一口");
-static const u8 sBerryDescriptionPart2_Bluk[] = _("嘴巴内部将变成一片漆黑");
-static const u8 sBerryDescriptionPart1_Nanab[] = _("这种树果是世界上被发现的第7种树果");
-static const u8 sBerryDescriptionPart2_Nanab[] = _("它的果实是甜的");
-static const u8 sBerryDescriptionPart1_Wepear[] = _("会开出娇小的白色花朵");
-static const u8 sBerryDescriptionPart2_Wepear[] = _("酸苦混杂，口味相当奇特");
-static const u8 sBerryDescriptionPart1_Pinap[] = _("害怕吹风和寒凉");
-static const u8 sBerryDescriptionPart2_Pinap[] = _("果肉有辣味，外皮带酸味");
-static const u8 sBerryDescriptionPart1_Pomeg[] = _("不管是浇多少水、给予多少营养");
-static const u8 sBerryDescriptionPart2_Pomeg[] = _("最多也只能结出6个果实");
-static const u8 sBerryDescriptionPart1_Kelpsy[] = _("有着树根般外形的稀有种类树果");
-static const u8 sBerryDescriptionPart2_Kelpsy[] = _("会开非常大的花");
-static const u8 sBerryDescriptionPart1_Qualot[] = _("最喜欢水分，即使是在长期下雨的地方");
-static const u8 sBerryDescriptionPart2_Qualot[] = _("这种树果也能茁壮成长");
-static const u8 sBerryDescriptionPart1_Hondew[] = _("这种树果的价格非常高昂");
-static const u8 sBerryDescriptionPart2_Hondew[] = _("因此难得一见，味道十分美味");
-static const u8 sBerryDescriptionPart1_Grepa[] = _("在那柔软且浑圆的外形下");
-static const u8 sBerryDescriptionPart2_Grepa[] = _("有着难以想象的酸味");
-static const u8 sBerryDescriptionPart1_Tamato[] = _("这辣辣的果实能把嘴唇辣到歪掉");
-static const u8 sBerryDescriptionPart2_Tamato[] = _("培育要花上不少时间");
-static const u8 sBerryDescriptionPart1_Cornn[] = _("从很久很久以前就已经有存在了");
-static const u8 sBerryDescriptionPart2_Cornn[] = _("没有栽种一定数量的话，有时会无法结出果实");
-static const u8 sBerryDescriptionPart1_Magost[] = _("味道的平衡度非常好");
-static const u8 sBerryDescriptionPart2_Magost[] = _("是颇受好评的树果");
-static const u8 sBerryDescriptionPart1_Rabuta[] = _("长着许多毛的稀有种类树果");
-static const u8 sBerryDescriptionPart2_Rabuta[] = _("味道相当苦.");
-static const u8 sBerryDescriptionPart1_Nomel[] = _("味道非常酸，只要吃下一口");
-static const u8 sBerryDescriptionPart2_Nomel[] = _("3天内都尝不出其它味道");
-static const u8 sBerryDescriptionPart1_Spelon[] = _("鲜红色的果实奇辣无比");
-static const u8 sBerryDescriptionPart2_Spelon[] = _("小突起里也含有辣味的成分");
-static const u8 sBerryDescriptionPart1_Pamtre[] = _("从大海漂流而来，不知道来自何处");
-static const u8 sBerryDescriptionPart2_Pamtre[] = _("似乎在世界的某处有栽种");
-static const u8 sBerryDescriptionPart1_Watmel[] = _("非常巨大，曾有人发现超过50厘米的果实");
-static const u8 sBerryDescriptionPart2_Watmel[] = _("口味非常甘甜");
-static const u8 sBerryDescriptionPart1_Durin[] = _("看着都觉得苦，这种树果实在太苦");
-static const u8 sBerryDescriptionPart2_Durin[] = _("以至于尚未有人能够直接食用");
-static const u8 sBerryDescriptionPart1_Belue[] = _("锃光瓦亮地，似乎显得很美味");
-static const u8 sBerryDescriptionPart2_Belue[] = _("但其实非常酸，要花不少时间来培育");
-static const u8 sBerryDescriptionPart1_Liechi[] = _("这是一种神秘的种子");
-static const u8 sBerryDescriptionPart2_Liechi[] = _("有传言说，它蕴藏着大海的力量");
-static const u8 sBerryDescriptionPart1_Ganlon[] = _("这是一种神秘的种子");
-static const u8 sBerryDescriptionPart2_Ganlon[] = _("有传言说，它蕴藏着大地的力量");
-static const u8 sBerryDescriptionPart1_Salac[] = _("这是一种神秘的种子");
-static const u8 sBerryDescriptionPart2_Salac[] = _("有传言说，它蕴藏着天空的力量");
-static const u8 sBerryDescriptionPart1_Petaya[] = _("这是一种神秘的种子");
-static const u8 sBerryDescriptionPart2_Petaya[] = _("有传言说，它蕴藏着所有生物的力量");
-static const u8 sBerryDescriptionPart1_Apicot[] = _("这是一种不可思议的树果");
-static const u8 sBerryDescriptionPart2_Apicot[] = _("没人知道它能够做什么，又会引发什么事");
-static const u8 sBerryDescriptionPart1_Lansat[] = _("被世人称为“传说中的果实”");
-static const u8 sBerryDescriptionPart2_Lansat[] = _("如果能拥有这种树果，似乎会变得非常幸福");
-static const u8 sBerryDescriptionPart1_Starf[] = _("由于力量过于惊人");
-static const u8 sBerryDescriptionPart2_Starf[] = _("而被丢弃在世界尽头的幻之果实");
-static const u8 sBerryDescriptionPart1_Enigma[] = _("这种树果的真实外观不明");
-static const u8 sBerryDescriptionPart2_Enigma[] = _("似乎拥有着星星的力量");
+// Check include/config/overworld.h configs and throw an error if illegal
+#if OW_BERRY_GROWTH_RATE < GEN_3 || (OW_BERRY_GROWTH_RATE > GEN_7 && OW_BERRY_GROWTH_RATE != GEN_6_ORAS)
+#error "树果生长速度必须在 GEN_3 和 GEN_7 之间！"
+#endif
 
-static const u8 sBerryDescriptionPart1_Occa[] = _("据说在热带地区能摘到很多的树果,");
-static const u8 sBerryDescriptionPart2_Occa[] = _("以灼热的辣味而闻名.");
-static const u8 sBerryDescriptionPart1_Passho[] = _("果实里面有很多装空气的小穴");
-static const u8 sBerryDescriptionPart2_Passho[] = _("因此能够轻飘飘地浮在水面.");
-static const u8 sBerryDescriptionPart1_Wacan[] = _("打向地面的落雷能量");
-static const u8 sBerryDescriptionPart2_Wacan[] = _("可以促使这种树果结出大量果实.");
-static const u8 sBerryDescriptionPart1_Rindo[] = _("植物特有的草腥味");
-static const u8 sBerryDescriptionPart2_Rindo[] = _("纤维质很多对身体有好处");
-static const u8 sBerryDescriptionPart1_Yache[] = _("涩味和酸味很平均地调和");
-static const u8 sBerryDescriptionPart2_Yache[] = _("冷冻一下味道更好");
-static const u8 sBerryDescriptionPart1_Chople[] = _("能够产生热量的效果");
-static const u8 sBerryDescriptionPart2_Chople[] = _("外面凉了内心也是火热的");
-static const u8 sBerryDescriptionPart1_Kebia[] = _("外表是鲜艳的绿色");
-static const u8 sBerryDescriptionPart2_Kebia[] = _("里面是又涩又黑的果实");
-static const u8 sBerryDescriptionPart1_Shuca[] = _("果肉的内部很硬");
-static const u8 sBerryDescriptionPart2_Shuca[] = _("感觉到很香的风味");
-static const u8 sBerryDescriptionPart1_Coba[] = _("很远的地方才有的树果");
-static const u8 sBerryDescriptionPart2_Coba[] = _("据说是新品种的树果");
-static const u8 sBerryDescriptionPart1_Payapa[] = _("有人类靠近的时候，从前脚膨胀");
-static const u8 sBerryDescriptionPart2_Payapa[] = _("起的球状物中可以阅读人的内心。");
-static const u8 sBerryDescriptionPart1_Tanga[] = _("从前端伸出的像细丝一样的花瓣在风中");
-static const u8 sBerryDescriptionPart2_Tanga[] = _("摇摆，引诱虫属性宝可梦附着。");
-static const u8 sBerryDescriptionPart1_Charti[] = _("因其涩味十足，多用于制作酱菜。");
-static const u8 sBerryDescriptionPart2_Charti[] = _("煮后口感会缓和很多。");
-static const u8 sBerryDescriptionPart1_Kasib[] = _("形似花朵且甜味浓重，是做点心的不二");
-static const u8 sBerryDescriptionPart2_Kasib[] = _("之选。也有人将其晒干作为护身符。");
-static const u8 sBerryDescriptionPart1_Haban[] = _("收集了很多以后一起熬，把苦味去掉");
-static const u8 sBerryDescriptionPart2_Haban[] = _("以后就是很好的果酱材料。");
-static const u8 sBerryDescriptionPart1_Colbur[] = _("从远古开始就寄宿着神秘的力量，");
-static const u8 sBerryDescriptionPart2_Colbur[] = _("晒干后也可以做成护身符。");
-static const u8 sBerryDescriptionPart1_Babiri[] = _("很硬，很刺激的味道。因此过去的人");
-static const u8 sBerryDescriptionPart2_Babiri[] = _("经常把它作为药的材料来使用。");
-static const u8 sBerryDescriptionPart1_Chilan[] = _("把中间挖空，晒干后用嘴向孔里吹气，");
-static const u8 sBerryDescriptionPart2_Chilan[] = _("可以发出无法形容的声音。");
-static const u8 sBerryDescriptionPart1_Roseli[] = _("神秘的树果，");
-static const u8 sBerryDescriptionPart2_Roseli[] = _("神奇宝贝百科上未能找到它的信息。");
-static const u8 sBerryDescriptionPart1_Micle[] = _("It makes other food eaten at the");
-static const u8 sBerryDescriptionPart2_Micle[] = _("same time taste sweet.");
-static const u8 sBerryDescriptionPart1_Custap[] = _("The flesh underneath the Custap");
-static const u8 sBerryDescriptionPart2_Custap[] = _("Berry's skin is sweet and creamy soft.");
-static const u8 sBerryDescriptionPart1_Jaboca[] = _("The drupelets that make up this berry");
-static const u8 sBerryDescriptionPart2_Jaboca[] = _("pop rythmically if handled roughly.");
-static const u8 sBerryDescriptionPart1_Rowap[] = _("People once worked top-shaped pieces");
-static const u8 sBerryDescriptionPart2_Rowap[] = _("of this berry free to use as toys.");
-static const u8 sBerryDescriptionPart1_Kee[] = _("A berry that is incredibly spicy at");
-static const u8 sBerryDescriptionPart2_Kee[] = _("first, then extremely bitter.");
-static const u8 sBerryDescriptionPart1_Maranga[] = _("Its outside is very bitter, but its");
-static const u8 sBerryDescriptionPart2_Maranga[] = _("inside tastes like a sweet drink.");
+#if OW_BERRY_YIELD_RATE < GEN_3 || (OW_BERRY_YIELD_RATE > GEN_6 && OW_BERRY_YIELD_RATE != GEN_6_ORAS)
+#error "树果生长速度必须在 GEN_3 和 GEN_6 之间！"
+#elif OW_BERRY_YIELD_RATE == GEN_5
+#error "树果生长速度不能是 GEN_5！"
+#endif
 
+#if OW_BERRY_MOISTURE && OW_BERRY_DRAIN_RATE != GEN_4 && OW_BERRY_DRAIN_RATE != GEN_6_XY && OW_BERRY_DRAIN_RATE != GEN_6_ORAS
+#error "树果生长速度必须是 GEN_5, GEN_6_XY 或 GEN_6_ORAS！"
+#endif
+
+#define GROWTH_DURATION(g3, g4, g5, xy, oras, g7) OW_BERRY_GROWTH_RATE == GEN_3 ? g3 : OW_BERRY_GROWTH_RATE == GEN_4 ? g4 : OW_BERRY_GROWTH_RATE == GEN_5 ? g5 : OW_BERRY_GROWTH_RATE == GEN_6_XY ? xy : OW_BERRY_GROWTH_RATE == GEN_6_ORAS ? oras : g7
+#define YIELD_RATE(g3, g4, xy, oras) OW_BERRY_YIELD_RATE == GEN_3 ? g3 : OW_BERRY_YIELD_RATE == GEN_4 ? g4 : OW_BERRY_YIELD_RATE == GEN_6_XY ? xy : oras
+//todo汉化
 const struct Berry gBerries[] =
 {
     [ITEM_CHERI_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("樱子果"),
+        .name = _("Cheri"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
         .size = 20,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Cheri,
-        .description2 = sBerryDescriptionPart2_Cheri,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("Blooms with delicate pretty flowers."),
+        .description2 = COMPOUND_STRING("The bright red Berry is very spicy."),
+        .growthDuration = GROWTH_DURATION(12, 12, 18, 24, 16, 24),
         .spicy = 10,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_CHESTO_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("零余果"),
+        .name = _("Chesto"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_PURPLE,
         .size = 80,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Chesto,
-        .description2 = sBerryDescriptionPart2_Chesto,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("The Berry's thick skin and fruit are"),
+        .description2 = COMPOUND_STRING("very tough. It is dry-tasting all over."),
+        .growthDuration = GROWTH_DURATION(12, 12, 18, 24, 16, 24),
         .spicy = 0,
         .dry = 10,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_PECHA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("桃桃果"),
+        .name = _("Pecha"),
         .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_PINK,
         .size = 40,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Pecha,
-        .description2 = sBerryDescriptionPart2_Pecha,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("Very sweet and delicious."),
+        .description2 = COMPOUND_STRING("Also very tender - handle with care."),
+        .growthDuration = GROWTH_DURATION(12, 12, 18, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 10,
         .bitter = 0,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 4,
+        .pestsBonus = 6,
     },
 
     [ITEM_RAWST_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("莓莓果"),
+        .name = _("Rawst"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 32,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Rawst,
-        .description2 = sBerryDescriptionPart2_Rawst,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("If the leaves grow long and curly,"),
+        .description2 = COMPOUND_STRING("the Berry seems to grow very bitter."),
+        .growthDuration = GROWTH_DURATION(12, 12, 18, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 10,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_ASPEAR_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("利木果"),
+        .name = _("Aspear"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_YELLOW,
         .size = 50,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Aspear,
-        .description2 = sBerryDescriptionPart2_Aspear,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("The hard Berry is dense with a rich"),
+        .description2 = COMPOUND_STRING("juice. It is quite sour."),
+        .growthDuration = GROWTH_DURATION(12, 12, 18, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 10,
         .smoothness = 25,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_LEPPA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("苹野果"),
+        .name = _("Leppa"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_RED,
         .size = 28,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Leppa,
-        .description2 = sBerryDescriptionPart2_Leppa,
-        .stageDuration = 4,
+        .maxYield = YIELD_RATE(3, 5, 15, 22),
+        .minYield = YIELD_RATE(2, 2, 2, 2),
+        .description1 = COMPOUND_STRING("Grows slower than Cheri and others."),
+        .description2 = COMPOUND_STRING("The smaller the Berry, the tastier."),
+        .growthDuration = GROWTH_DURATION(16, 16, 24, 24, 16, 24),
         .spicy = 10,
         .dry = 0,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 15,
+        .waterBonus = 15,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_ORAN_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("橙橙果"),
+        .name = _("Oran"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_BLUE,
         .size = 35,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Oran,
-        .description2 = sBerryDescriptionPart2_Oran,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("A peculiar Berry with a mix of flavors."),
+        .description2 = COMPOUND_STRING("Berries grow in half a day."),
+        .growthDuration = GROWTH_DURATION(12, 16, 24, 24, 16, 24),
         .spicy = 10,
         .dry = 10,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 4,
+        .pestsBonus = 6,
     },
 
     [ITEM_PERSIM_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("柿仔果"),
+        .name = _("Persim"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PINK,
         .size = 47,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Persim,
-        .description2 = sBerryDescriptionPart2_Persim,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(3, 5, 15, 20),
+        .minYield = YIELD_RATE(2, 2, 4, 4),
+        .description1 = COMPOUND_STRING("Loves sunlight. The Berry's color"),
+        .description2 = COMPOUND_STRING("grows vivid when exposed to the sun."),
+        .growthDuration = GROWTH_DURATION(12, 16, 24, 24, 16, 24),
         .spicy = 10,
         .dry = 10,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 15,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_LUM_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("木子果"),
+        .name = _("Lum"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 34,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Lum,
-        .description2 = sBerryDescriptionPart2_Lum,
-        .stageDuration = 12,
+        .maxYield = YIELD_RATE(2, 5, 20, 18),
+        .minYield = YIELD_RATE(1, 2, 3, 2),
+        .description1 = COMPOUND_STRING("Slow to grow. If raised with loving"),
+        .description2 = COMPOUND_STRING("care, it may grow two Berries."),
+        .growthDuration = GROWTH_DURATION(48, 48, 72, 48, 32, 48),
         .spicy = 10,
         .dry = 10,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 8,
+        .waterBonus = 12,
+        .weedsBonus = 1,
+        .pestsBonus = 6,
     },
 
     [ITEM_SITRUS_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("文柚果"),
+        .name = _("Sitrus"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_YELLOW,
         .size = 95,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Sitrus,
-        .description2 = sBerryDescriptionPart2_Sitrus,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(3, 5, 20, 27),
+        .minYield = YIELD_RATE(2, 2, 3, 3),
+        .description1 = COMPOUND_STRING("Closely related to Oran. The large"),
+        .description2 = COMPOUND_STRING("Berry has a well-rounded flavor."),
+        .growthDuration = GROWTH_DURATION(24, 32, 48, 48, 32, 48),
         .spicy = 10,
         .dry = 10,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 7,
+        .waterBonus = 12,
+        .weedsBonus = 1,
+        .pestsBonus = 6,
     },
 
     [ITEM_FIGY_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("勿花果"),
+        .name = _("Figy"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
         .size = 100,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Figy,
-        .description2 = sBerryDescriptionPart2_Figy,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(3, 5, 15, 15),
+        .minYield = YIELD_RATE(2, 1, 3, 3),
+        .description1 = COMPOUND_STRING("The Berry, which looks chewed up,"),
+        .description2 = COMPOUND_STRING("brims with spicy substances."),
+        .growthDuration = GROWTH_DURATION(24, 20, 30, 24, 16, 24),
         .spicy = 10,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 10,
+        .waterBonus = 15,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_WIKI_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("异奇果"),
+        .name = _("Wiki"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PURPLE,
         .size = 115,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Wiki,
-        .description2 = sBerryDescriptionPart2_Wiki,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(3, 5, 15, 15),
+        .minYield = YIELD_RATE(2, 1, 3, 3),
+        .description1 = COMPOUND_STRING("The Berry is said to have grown lumpy"),
+        .description2 = COMPOUND_STRING("to help Pokémon grip it."),
+        .growthDuration = GROWTH_DURATION(24, 20, 30, 24, 16, 24),
         .spicy = 0,
         .dry = 10,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 10,
+        .waterBonus = 15,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_MAGO_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("芒芒果"),
+        .name = _("Mago"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PINK,
         .size = 126,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Mago,
-        .description2 = sBerryDescriptionPart2_Mago,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(3, 5, 15, 15),
+        .minYield = YIELD_RATE(2, 1, 3, 3),
+        .description1 = COMPOUND_STRING("The Berry turns curvy as it grows."),
+        .description2 = COMPOUND_STRING("The curvier, the sweeter and tastier."),
+        .growthDuration = GROWTH_DURATION(24, 20, 30, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 10,
         .bitter = 0,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 10,
+        .waterBonus = 15,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_AGUAV_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("乐芭果"),
+        .name = _("Aguav"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 64,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Aguav,
-        .description2 = sBerryDescriptionPart2_Aguav,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(3, 5, 15, 15),
+        .minYield = YIELD_RATE(2, 1, 3, 3),
+        .description1 = COMPOUND_STRING("The flower is dainty. It is rare in its"),
+        .description2 = COMPOUND_STRING("ability to grow without light."),
+        .growthDuration = GROWTH_DURATION(24, 20, 30, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 10,
         .sour = 0,
         .smoothness = 25,
+        .drainRate = 10,
+        .waterBonus = 15,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_IAPAPA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("芭亚果"),
+        .name = _("Iapapa"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_YELLOW,
         .size = 223,
-        .maxYield = 3,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Iapapa,
-        .description2 = sBerryDescriptionPart2_Iapapa,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(3, 5, 15, 15),
+        .minYield = YIELD_RATE(2, 1, 3, 3),
+        .description1 = COMPOUND_STRING("The Berry is very big and sour."),
+        .description2 = COMPOUND_STRING("It takes at least a day to grow."),
+        .growthDuration = GROWTH_DURATION(24, 20, 30, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 10,
         .smoothness = 25,
+        .drainRate = 10,
+        .waterBonus = 15,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_RAZZ_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("蔓莓果"),
+        .name = _("Razz"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_RED,
         .size = 120,
-        .maxYield = 6,
-        .minYield = 3,
-        .description1 = sBerryDescriptionPart1_Razz,
-        .description2 = sBerryDescriptionPart2_Razz,
-        .stageDuration = 1,
+        .maxYield = YIELD_RATE(6, 10, 15, 20),
+        .minYield = YIELD_RATE(3, 2, 3, 4),
+        .description1 = COMPOUND_STRING("The red Berry tastes slightly spicy."),
+        .description2 = COMPOUND_STRING("It grows quickly in just four hours."),
+        .growthDuration = GROWTH_DURATION(4, 8, 12, 24, 16, 24),
         .spicy = 10,
         .dry = 10,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 20,
+        .drainRate = 35,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_BLUK_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("墨莓果"),
+        .name = _("Bluk"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_PURPLE,
         .size = 108,
-        .maxYield = 6,
-        .minYield = 3,
-        .description1 = sBerryDescriptionPart1_Bluk,
-        .description2 = sBerryDescriptionPart2_Bluk,
-        .stageDuration = 1,
+        .maxYield = YIELD_RATE(6, 10, 15, 20),
+        .minYield = YIELD_RATE(3, 2, 3, 4),
+        .description1 = COMPOUND_STRING("The Berry is blue on the outside, but"),
+        .description2 = COMPOUND_STRING("it blackens the mouth when eaten."),
+        .growthDuration = GROWTH_DURATION(4, 8, 12, 24, 16, 24),
         .spicy = 0,
         .dry = 10,
         .sweet = 10,
         .bitter = 0,
         .sour = 0,
         .smoothness = 20,
+        .drainRate = 35,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_NANAB_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("蕉香果"),
+        .name = _("Nanab"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_PINK,
         .size = 77,
-        .maxYield = 6,
-        .minYield = 3,
-        .description1 = sBerryDescriptionPart1_Nanab,
-        .description2 = sBerryDescriptionPart2_Nanab,
-        .stageDuration = 1,
+        .maxYield = YIELD_RATE(6, 10, 15, 20),
+        .minYield = YIELD_RATE(3, 2, 3, 4),
+        .description1 = COMPOUND_STRING("This Berry was the seventh"),
+        .description2 = COMPOUND_STRING("discovered in the world. It is sweet."),
+        .growthDuration = GROWTH_DURATION(4, 8, 12, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 10,
         .bitter = 10,
         .sour = 0,
         .smoothness = 20,
+        .drainRate = 35,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_WEPEAR_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("西梨果"),
+        .name = _("Wepear"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 74,
-        .maxYield = 6,
-        .minYield = 3,
-        .description1 = sBerryDescriptionPart1_Wepear,
-        .description2 = sBerryDescriptionPart2_Wepear,
-        .stageDuration = 1,
+        .maxYield = YIELD_RATE(6, 10, 15, 20),
+        .minYield = YIELD_RATE(3, 2, 3, 4),
+        .description1 = COMPOUND_STRING("The flower is small and white. It has a"),
+        .description2 = COMPOUND_STRING("delicate balance of bitter and sour."),
+        .growthDuration = GROWTH_DURATION(4, 8, 12, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 35,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_PINAP_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("凰梨果"),
+        .name = _("Pinap"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_YELLOW,
         .size = 80,
-        .maxYield = 6,
-        .minYield = 3,
-        .description1 = sBerryDescriptionPart1_Pinap,
-        .description2 = sBerryDescriptionPart2_Pinap,
-        .stageDuration = 1,
+        .maxYield = YIELD_RATE(6, 10, 15, 20),
+        .minYield = YIELD_RATE(3, 2, 3, 4),
+        .description1 = COMPOUND_STRING("Weak against wind and cold."),
+        .description2 = COMPOUND_STRING("The fruit is spicy and the skin, sour."),
+        .growthDuration = GROWTH_DURATION(4, 8, 12, 24, 16, 24),
         .spicy = 10,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 35,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_POMEG_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("榴石果"),
+        .name = _("Pomeg"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_RED,
         .size = 135,
-        .maxYield = 6,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Pomeg,
-        .description2 = sBerryDescriptionPart2_Pomeg,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(6, 5, 20, 26),
+        .minYield = YIELD_RATE(2, 1, 1, 2),
+        .description1 = COMPOUND_STRING("However much it is watered,"),
+        .description2 = COMPOUND_STRING("it only grows up to six Berries."),
+        .growthDuration = GROWTH_DURATION(12, 32, 48, 48, 32, 48),
         .spicy = 10,
         .dry = 0,
         .sweet = 10,
         .bitter = 10,
         .sour = 0,
         .smoothness = 20,
+        .drainRate = 8,
+        .waterBonus = 5,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_KELPSY_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("藻根果"),
+        .name = _("Kelpsy"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_BLUE,
         .size = 150,
-        .maxYield = 6,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Kelpsy,
-        .description2 = sBerryDescriptionPart2_Kelpsy,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(6, 5, 20, 26),
+        .minYield = YIELD_RATE(2, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A rare variety shaped like a root."),
+        .description2 = COMPOUND_STRING("Grows a very large flower."),
+        .growthDuration = GROWTH_DURATION(12, 32, 48, 48, 32, 48),
         .spicy = 0,
         .dry = 10,
         .sweet = 0,
         .bitter = 10,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 8,
+        .waterBonus = 5,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_QUALOT_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("比巴果"),
+        .name = _("Qualot"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_YELLOW,
         .size = 110,
-        .maxYield = 6,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Qualot,
-        .description2 = sBerryDescriptionPart2_Qualot,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(6, 5, 20, 26),
+        .minYield = YIELD_RATE(2, 1, 1, 2),
+        .description1 = COMPOUND_STRING("Loves water. Grows strong even in"),
+        .description2 = COMPOUND_STRING("locations with constant rainfall."),
+        .growthDuration = GROWTH_DURATION(12, 32, 48, 48, 32, 48),
         .spicy = 10,
         .dry = 0,
         .sweet = 10,
         .bitter = 0,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 8,
+        .waterBonus = 5,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_HONDEW_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("哈密果"),
+        .name = _("Hondew"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 162,
-        .maxYield = 6,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Hondew,
-        .description2 = sBerryDescriptionPart2_Hondew,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(6, 5, 20, 26),
+        .minYield = YIELD_RATE(2, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A Berry that is very valuable and"),
+        .description2 = COMPOUND_STRING("rarely seen. It is very delicious."),
+        .growthDuration = GROWTH_DURATION(12, 32, 48, 48, 32, 48),
         .spicy = 10,
         .dry = 10,
         .sweet = 0,
         .bitter = 10,
         .sour = 0,
         .smoothness = 20,
+        .drainRate = 8,
+        .waterBonus = 5,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_GREPA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("萄葡果"),
+        .name = _("Grepa"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_YELLOW,
         .size = 149,
-        .maxYield = 6,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Grepa,
-        .description2 = sBerryDescriptionPart2_Grepa,
-        .stageDuration = 3,
+        .maxYield = YIELD_RATE(6, 5, 20, 26),
+        .minYield = YIELD_RATE(2, 1, 1, 2),
+        .description1 = COMPOUND_STRING("Despite its tenderness and round"),
+        .description2 = COMPOUND_STRING("shape, the Berry is unimaginably sour."),
+        .growthDuration = GROWTH_DURATION(12, 32, 48, 48, 32, 48),
         .spicy = 0,
         .dry = 10,
         .sweet = 10,
         .bitter = 0,
         .sour = 10,
         .smoothness = 20,
+        .drainRate = 8,
+        .waterBonus = 5,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_TAMATO_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("茄番果"),
+        .name = _("Tamato"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
         .size = 200,
-        .maxYield = 4,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Tamato,
-        .description2 = sBerryDescriptionPart2_Tamato,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(4, 5, 20, 26),
+        .minYield = YIELD_RATE(2, 1, 1, 2),
+        .description1 = COMPOUND_STRING("The Berry is lip-bendingly spicy."),
+        .description2 = COMPOUND_STRING("It takes time to grow."),
+        .growthDuration = GROWTH_DURATION(24, 32, 48, 48, 32, 48),
         .spicy = 20,
         .dry = 10,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 30,
+        .drainRate = 8,
+        .waterBonus = 5,
+        .weedsBonus = 3,
+        .pestsBonus = 6,
     },
 
     [ITEM_CORNN_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("玉黍果"),
+        .name = _("Cornn"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PURPLE,
         .size = 75,
-        .maxYield = 4,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Cornn,
-        .description2 = sBerryDescriptionPart2_Cornn,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(4, 10, 15, 15),
+        .minYield = YIELD_RATE(2, 2, 3, 3),
+        .description1 = COMPOUND_STRING("A Berry from an ancient era. May not"),
+        .description2 = COMPOUND_STRING("grow unless planted in quantity."),
+        .growthDuration = GROWTH_DURATION(24, 24, 36, 24, 16, 24),
         .spicy = 0,
         .dry = 20,
         .sweet = 10,
         .bitter = 0,
         .sour = 0,
         .smoothness = 30,
+        .drainRate = 10,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_MAGOST_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("岳竹果"),
+        .name = _("Magost"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PINK,
         .size = 140,
-        .maxYield = 4,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Magost,
-        .description2 = sBerryDescriptionPart2_Magost,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(4, 10, 15, 15),
+        .minYield = YIELD_RATE(2, 2, 3, 3),
+        .description1 = COMPOUND_STRING("A Berry that is widely said to have"),
+        .description2 = COMPOUND_STRING("a finely balanced flavor."),
+        .growthDuration = GROWTH_DURATION(24, 24, 36, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 20,
         .bitter = 10,
         .sour = 0,
         .smoothness = 30,
+        .drainRate = 10,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_RABUTA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("茸丹果"),
+        .name = _("Rabuta"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_GREEN,
         .size = 226,
-        .maxYield = 4,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Rabuta,
-        .description2 = sBerryDescriptionPart2_Rabuta,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(4, 10, 15, 15),
+        .minYield = YIELD_RATE(2, 2, 3, 3),
+        .description1 = COMPOUND_STRING("A rare variety that is overgrown with"),
+        .description2 = COMPOUND_STRING("hair. It is quite bitter."),
+        .growthDuration = GROWTH_DURATION(24, 24, 36, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 20,
         .sour = 10,
         .smoothness = 30,
+        .drainRate = 10,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_NOMEL_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("檬柠果"),
+        .name = _("Nomel"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_YELLOW,
         .size = 285,
-        .maxYield = 4,
-        .minYield = 2,
-        .description1 = sBerryDescriptionPart1_Nomel,
-        .description2 = sBerryDescriptionPart2_Nomel,
-        .stageDuration = 6,
+        .maxYield = YIELD_RATE(4, 10, 15, 15),
+        .minYield = YIELD_RATE(2, 2, 3, 3),
+        .description1 = COMPOUND_STRING("Quite sour. Just one bite makes it"),
+        .description2 = COMPOUND_STRING("impossible to taste for three days."),
+        .growthDuration = GROWTH_DURATION(24, 24, 36, 24, 16, 24),
         .spicy = 10,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 20,
         .smoothness = 30,
+        .drainRate = 10,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_SPELON_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("刺角果"),
+        .name = _("Spelon"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
         .size = 133,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Spelon,
-        .description2 = sBerryDescriptionPart2_Spelon,
-        .stageDuration = 18,
+        .maxYield = YIELD_RATE(2, 15, 15, 15),
+        .minYield = YIELD_RATE(1, 2, 3, 3),
+        .description1 = COMPOUND_STRING("The vividly red Berry is very spicy."),
+        .description2 = COMPOUND_STRING("Its warts secrete a spicy substance."),
+        .growthDuration = GROWTH_DURATION(72, 60, 90, 24, 16, 24),
         .spicy = 40,
         .dry = 10,
         .sweet = 0,
         .bitter = 0,
         .sour = 0,
         .smoothness = 70,
+        .drainRate = 8,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_PAMTRE_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("椰木果"),
+        .name = _("Pamtre"),
         .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_PURPLE,
         .size = 244,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Pamtre,
-        .description2 = sBerryDescriptionPart2_Pamtre,
-        .stageDuration = 18,
+        .maxYield = YIELD_RATE(2, 15, 15, 15),
+        .minYield = YIELD_RATE(1, 3, 3, 3),
+        .description1 = COMPOUND_STRING("Drifts on the sea from somewhere."),
+        .description2 = COMPOUND_STRING("It is thought to grow elsewhere."),
+        .growthDuration = GROWTH_DURATION(72, 60, 90, 24, 16, 24),
         .spicy = 0,
         .dry = 40,
         .sweet = 10,
         .bitter = 0,
         .sour = 0,
         .smoothness = 70,
+        .drainRate = 8,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_WATMEL_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("瓜西果"),
+        .name = _("Watmel"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_PINK,
         .size = 250,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Watmel,
-        .description2 = sBerryDescriptionPart2_Watmel,
-        .stageDuration = 18,
+        .maxYield = YIELD_RATE(2, 15, 15, 15),
+        .minYield = YIELD_RATE(1, 2, 3, 3),
+        .description1 = COMPOUND_STRING("A huge Berry, with some over 20"),
+        .description2 = COMPOUND_STRING("inches discovered. Exceedingly sweet."),
+        .growthDuration = GROWTH_DURATION(72, 60, 90, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 40,
         .bitter = 10,
         .sour = 0,
         .smoothness = 70,
+        .drainRate = 8,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_DURIN_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("金枕果"),
+        .name = _("Durin"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 280,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Durin,
-        .description2 = sBerryDescriptionPart2_Durin,
-        .stageDuration = 18,
+        .maxYield = YIELD_RATE(2, 15, 15, 15),
+        .minYield = YIELD_RATE(1, 3, 3, 3),
+        .description1 = COMPOUND_STRING("Bitter to even look at. It is so"),
+        .description2 = COMPOUND_STRING("bitter, no one has ever eaten it as is."),
+        .growthDuration = GROWTH_DURATION(72, 60, 90, 24, 16, 24),
         .spicy = 0,
         .dry = 0,
         .sweet = 0,
         .bitter = 40,
         .sour = 10,
         .smoothness = 70,
+        .drainRate = 8,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
     },
 
     [ITEM_BELUE_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("靛莓果"),
+        .name = _("Belue"),
         .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_PURPLE,
         .size = 300,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Belue,
-        .description2 = sBerryDescriptionPart2_Belue,
-        .stageDuration = 18,
+        .maxYield = YIELD_RATE(2, 15, 15, 15),
+        .minYield = YIELD_RATE(1, 2, 3, 3),
+        .description1 = COMPOUND_STRING("It is glossy and looks delicious, but"),
+        .description2 = COMPOUND_STRING("it is awfully sour. Takes time to grow."),
+        .growthDuration = GROWTH_DURATION(72, 60, 90, 24, 16, 24),
         .spicy = 10,
         .dry = 0,
         .sweet = 0,
         .bitter = 0,
         .sour = 40,
         .smoothness = 70,
+        .drainRate = 8,
+        .waterBonus = 10,
+        .weedsBonus = 2,
+        .pestsBonus = 6,
+    },
+
+    [ITEM_CHILAN_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Chilan"),
+        .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_YELLOW,
+        .size = 34,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("It can be made into a whistle that"),
+        .description2 = COMPOUND_STRING("produces an indescribable sound."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 25,
+        .sweet = 10,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_OCCA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Occa"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_RED,
+        .size = 90,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Said to grow in the tropics once,"),
+        .description2 = COMPOUND_STRING("it boasts an intensely hot spiciness."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 15,
+        .dry = 0,
+        .sweet = 10,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_PASSHO_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Passho"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_BLUE,
+        .size = 33,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Its flesh is dotted with many tiny"),
+        .description2 = COMPOUND_STRING("bubbles that keep it afloat in water."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 15,
+        .sweet = 0,
+        .bitter = 10,
+        .sour = 0,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_WACAN_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Wacan"),
+        .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_YELLOW,
+        .size = 250,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Energy drawn from lightning strikes"),
+        .description2 = COMPOUND_STRING("makes this Berry grow big and rich."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 15,
+        .bitter = 0,
+        .sour = 10,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_RINDO_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Rindo"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_GREEN,
+        .size = 156,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("This berry has a vegetable-like flavor,"),
+        .description2 = COMPOUND_STRING("but is rich in health-promoting fiber."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 10,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 15,
+        .sour = 0,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_YACHE_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Yache"),
+        .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_BLUE,
+        .size = 135,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("This Berry has a refreshing dry and"),
+        .description2 = COMPOUND_STRING("sour flavor. Tastes better chilled."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 10,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 15,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_CHOPLE_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Chople"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
+        .size = 77,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Contains a substance that generates"),
+        .description2 = COMPOUND_STRING("heat. Can even fire up a chilly heart."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 15,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 10,
+        .sour = 0,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_KEBIA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Kebia"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_GREEN,
+        .size = 90,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Brilliant green on the outside, inside"),
+        .description2 = COMPOUND_STRING("it is packed with black-colored flesh."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 15,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 10,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_SHUCA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Shuca"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_YELLOW,
+        .size = 42,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("The sweet pulp has just the hint of a"),
+        .description2 = COMPOUND_STRING("a hard-edged and fragrant bite to it."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 10,
+        .dry = 0,
+        .sweet = 15,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_COBA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Coba"),
+        .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_BLUE,
+        .size = 278,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("This Berry is said to be a cross of"),
+        .description2 = COMPOUND_STRING("two Berries blown in from far away."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 10,
+        .sweet = 0,
+        .bitter = 15,
+        .sour = 0,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_PAYAPA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Payapa"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_PURPLE,
+        .size = 252,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Said to sense human emotions, it swells"),
+        .description2 = COMPOUND_STRING("roundly when a person approaches."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 10,
+        .bitter = 0,
+        .sour = 15,
+        .smoothness = 30,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_TANGA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Tanga"),
+        .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_GREEN,
+        .size = 42,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("It grows a flower at the tip that lures"),
+        .description2 = COMPOUND_STRING("Bug Pokémon with its stringy petals."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 20,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 10,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_CHARTI_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Charti"),
+        .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_YELLOW,
+        .size = 28,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Often used for pickles because of its"),
+        .description2 = COMPOUND_STRING("dry flavor. Sometimes eaten raw."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 10,
+        .dry = 20,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_KASIB_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Kasib"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PURPLE,
+        .size = 144,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Old superstitions say it has an odd"),
+        .description2 = COMPOUND_STRING("power. A popular good-luck charm."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 10,
+        .sweet = 20,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_HABAN_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Haban"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
+        .size = 23,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Less bitter if enough of this Berry"),
+        .description2 = COMPOUND_STRING("is boiled down. Makes a good jam."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 10,
+        .bitter = 20,
+        .sour = 0,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_COLBUR_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Colbur"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_PURPLE,
+        .size = 39,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Tiny hooks on the surface latch onto"),
+        .description2 = COMPOUND_STRING("Pokémon to reach far-off places."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 10,
+        .sour = 20,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_BABIRI_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Babiri"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_GREEN,
+        .size = 265,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("Very tough with a strong flavor. It"),
+        .description2 = COMPOUND_STRING("was used to make medicine in the past."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 25,
+        .dry = 10,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
+    },
+
+    [ITEM_ROSELI_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Roseli"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PINK,
+        .size = 35,
+        .maxYield = YIELD_RATE(5, 5, 20, 10),
+        .minYield = YIELD_RATE(2, 1, 3, 2),
+        .description1 = COMPOUND_STRING("In nature, they grow in wide rings"),
+        .description2 = COMPOUND_STRING("for reasons that are still unknown."),
+        .growthDuration = GROWTH_DURATION(84, 72, 108, 48, 32, 48),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 25,
+        .bitter = 10,
+        .sour = 0,
+        .smoothness = 35,
+        .drainRate = 6,
+        .waterBonus = 10,
+        .weedsBonus = 1,
+        .pestsBonus = 4,
     },
 
     [ITEM_LIECHI_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("枝荔果"),
+        .name = _("Liechi"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_RED,
         .size = 111,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Liechi,
-        .description2 = sBerryDescriptionPart2_Liechi,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A mysterious Berry. It is rumored to"),
+        .description2 = COMPOUND_STRING("contain the power of the sea."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
         .spicy = 40,
         .dry = 0,
         .sweet = 40,
         .bitter = 0,
         .sour = 10,
         .smoothness = 80,
+        .drainRate = 4,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
     },
 
     [ITEM_GANLON_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("龙睛果"),
+        .name = _("Ganlon"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_PURPLE,
         .size = 33,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Ganlon,
-        .description2 = sBerryDescriptionPart2_Ganlon,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A mysterious Berry. It is rumored to"),
+        .description2 = COMPOUND_STRING("contain the power of the land."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
         .spicy = 0,
         .dry = 40,
         .sweet = 0,
         .bitter = 40,
         .sour = 0,
         .smoothness = 80,
+        .drainRate = 4,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
     },
 
     [ITEM_SALAC_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("沙鳞果"),
+        .name = _("Salac"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 95,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Salac,
-        .description2 = sBerryDescriptionPart2_Salac,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A mysterious Berry. It is rumored to"),
+        .description2 = COMPOUND_STRING("contain the power of the sky."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
         .spicy = 0,
         .dry = 0,
         .sweet = 40,
         .bitter = 0,
         .sour = 40,
         .smoothness = 80,
+        .drainRate = 4,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
     },
 
     [ITEM_PETAYA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("龙火果"),
+        .name = _("Petaya"),
         .firmness = BERRY_FIRMNESS_VERY_HARD,
+        .color = BERRY_COLOR_PINK,
         .size = 237,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Petaya,
-        .description2 = sBerryDescriptionPart2_Petaya,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A mysterious Berry. It is rumored to"),
+        .description2 = COMPOUND_STRING("contain the power of all living things."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
         .spicy = 40,
         .dry = 0,
         .sweet = 0,
         .bitter = 40,
         .sour = 0,
         .smoothness = 80,
+        .drainRate = 4,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
     },
 
     [ITEM_APICOT_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("杏仔果"),
+        .name = _("Apicot"),
         .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_BLUE,
         .size = 75,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Apicot,
-        .description2 = sBerryDescriptionPart2_Apicot,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A very mystifying Berry. No telling"),
+        .description2 = COMPOUND_STRING("what may happen or how it can be used."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
         .spicy = 0,
         .dry = 40,
         .sweet = 0,
         .bitter = 0,
         .sour = 40,
         .smoothness = 80,
+        .drainRate = 4,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
     },
 
     [ITEM_LANSAT_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("兰萨果"),
+        .name = _("Lansat"),
         .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_RED,
         .size = 97,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Lansat,
-        .description2 = sBerryDescriptionPart2_Lansat,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 5, 7),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("Said to be a legendary Berry."),
+        .description2 = COMPOUND_STRING("Holding it supposedly brings joy."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 120, 48, 72),
         .spicy = 10,
         .dry = 10,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 30,
+        .drainRate = 4,
+        .waterBonus = 1,
+        .weedsBonus = 0,
+        .pestsBonus = 1,
     },
 
     [ITEM_STARF_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("星桃果"),
+        .name = _("Starf"),
         .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_GREEN,
         .size = 153,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Starf,
-        .description2 = sBerryDescriptionPart2_Starf,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 5, 7),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("So strong, it was abandoned at the"),
+        .description2 = COMPOUND_STRING("world's edge. Considered a mirage."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 120, 48, 72),
         .spicy = 10,
         .dry = 10,
         .sweet = 10,
         .bitter = 10,
         .sour = 10,
         .smoothness = 30,
+        .drainRate = 4,
+        .waterBonus = 1,
+        .weedsBonus = 0,
+        .pestsBonus = 1,
     },
 
     [ITEM_ENIGMA_BERRY - FIRST_BERRY_INDEX] =
     {
-        .name = _("谜芝果"),
+        .name = _("Enigma"),
+        .firmness = BERRY_FIRMNESS_HARD,
+        .color = BERRY_COLOR_PURPLE,
+        .size = 155,
+        .maxYield = YIELD_RATE(2, 5, 5, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("A completely enigmatic Berry."),
+        .description2 = COMPOUND_STRING("Appears to have the power of stars."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 72, 48, 72),
+        .spicy = 40,
+        .dry = 10,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 0,
+    },
+
+    [ITEM_MICLE_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Micle"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_GREEN,
+        .size = 41,
+        .maxYield = YIELD_RATE(2, 5, 5, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("It makes other food eaten at the"),
+        .description2 = COMPOUND_STRING("same time taste sweet."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 72, 48, 72),
+        .spicy = 0,
+        .dry = 40,
+        .sweet = 10,
+        .bitter = 0,
+        .sour = 0,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 0,
+    },
+
+    [ITEM_CUSTAP_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Custap"),
+        .firmness = BERRY_FIRMNESS_SUPER_HARD,
+        .color = BERRY_COLOR_RED,
+        .size = 267,
+        .maxYield = YIELD_RATE(2, 5, 5, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("The flesh underneath the Custap"),
+        .description2 = COMPOUND_STRING("Berry's skin is sweet and creamy soft."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 72, 48, 72),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 40,
+        .bitter = 10,
+        .sour = 0,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 0,
+    },
+
+    [ITEM_JABOCA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Jaboca"),
+        .firmness = BERRY_FIRMNESS_SOFT,
+        .color = BERRY_COLOR_YELLOW,
+        .size = 33,
+        .maxYield = YIELD_RATE(2, 5, 5, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("The drupelets that make up this berry"),
+        .description2 = COMPOUND_STRING("pop rythmically if handled roughly."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 72, 48, 72),
+        .spicy = 0,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 40,
+        .sour = 10,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 0,
+    },
+
+    [ITEM_ROWAP_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Rowap"),
+        .firmness = BERRY_FIRMNESS_VERY_SOFT,
+        .color = BERRY_COLOR_BLUE,
+        .size = 52,
+        .maxYield = YIELD_RATE(2, 5, 5, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("People once worked top-shaped pieces"),
+        .description2 = COMPOUND_STRING("of this berry free to use as toys."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 72, 48, 72),
+        .spicy = 10,
+        .dry = 0,
+        .sweet = 0,
+        .bitter = 0,
+        .sour = 40,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 0,
+    },
+
+    [ITEM_KEE_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Kee"),
         .firmness = BERRY_FIRMNESS_UNKNOWN,
+        .color = BERRY_COLOR_YELLOW,
         .size = 0,
-        .maxYield = 2,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Enigma,
-        .description2 = sBerryDescriptionPart2_Enigma,
-        .stageDuration = 24,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("A berry that is incredibly spicy at"),
+        .description2 = COMPOUND_STRING("first, then extremely bitter."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
+        .spicy = 30,
+        .dry = 30,
+        .sweet = 10,
+        .bitter = 10,
+        .sour = 10,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
+    },
+
+    [ITEM_MARANGA_BERRY - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Marnga"), // "Maranga" is too long
+        .firmness = BERRY_FIRMNESS_UNKNOWN,
+        .color = BERRY_COLOR_BLUE,
+        .size = 0,
+        .maxYield = YIELD_RATE(2, 5, 10, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 2),
+        .description1 = COMPOUND_STRING("Its outside is very bitter, but its"),
+        .description2 = COMPOUND_STRING("inside tastes like a sweet drink."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 96, 48, 72),
+        .spicy = 10,
+        .dry = 10,
+        .sweet = 30,
+        .bitter = 30,
+        .sour = 10,
+        .smoothness = 60,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 2,
+    },
+
+    [ITEM_ENIGMA_BERRY_E_READER - FIRST_BERRY_INDEX] =
+    {
+        .name = _("Enigma"),
+        .firmness = BERRY_FIRMNESS_UNKNOWN,
+        .color = BERRY_COLOR_PURPLE,
+        .size = 0,
+        .maxYield = YIELD_RATE(2, 5, 5, 13),
+        .minYield = YIELD_RATE(1, 1, 1, 1),
+        .description1 = COMPOUND_STRING("A completely enigmatic Berry."),
+        .description2 = COMPOUND_STRING("Appears to have the power of stars."),
+        .growthDuration = GROWTH_DURATION(96, 96, 144, 72, 48, 72),
         .spicy = 40,
         .dry = 40,
         .sweet = 40,
         .bitter = 40,
         .sour = 40,
         .smoothness = 40,
-    },
-
-    [ITEM_OCCA_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("巧可果"),
-        .firmness = BERRY_FIRMNESS_SUPER_HARD,
-        .size = 89,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Occa,
-        .description2 = sBerryDescriptionPart2_Occa,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_PASSHO_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("千香果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 33,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Passho,
-        .description2 = sBerryDescriptionPart2_Passho,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_WACAN_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("烛木果"),
-        .firmness = BERRY_FIRMNESS_VERY_SOFT,
-        .size = 250,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Wacan,
-        .description2 = sBerryDescriptionPart2_Wacan,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_RINDO_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("罗子果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 155,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Rindo,
-        .description2 = sBerryDescriptionPart2_Rindo,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_YACHE_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("番荔果"),
-        .firmness = BERRY_FIRMNESS_VERY_HARD,
-        .size = 135,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Yache,
-        .description2 = sBerryDescriptionPart2_Yache,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_CHOPLE_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("莲蒲果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 77,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Chople,
-        .description2 = sBerryDescriptionPart2_Chople,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_KEBIA_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("通通果"),
-        .firmness = BERRY_FIRMNESS_HARD,
-        .size = 89,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Kebia,
-        .description2 = sBerryDescriptionPart2_Kebia,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_SHUCA_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("腰木果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 42,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Shuca,
-        .description2 = sBerryDescriptionPart2_Shuca,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_COBA_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("棱瓜果"),
-        .firmness = BERRY_FIRMNESS_VERY_HARD,
-        .size = 277,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Coba,
-        .description2 = sBerryDescriptionPart2_Coba,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_PAYAPA_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("福禄果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 251,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Payapa,
-        .description2 = sBerryDescriptionPart2_Payapa,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_TANGA_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("扁樱果"),
-        .firmness = BERRY_FIRMNESS_VERY_SOFT,
-        .size = 43,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Tanga,
-        .description2 = sBerryDescriptionPart2_Tanga,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_CHARTI_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("草蚕果"),
-        .firmness = BERRY_FIRMNESS_VERY_SOFT,
-        .size = 28,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Charti,
-        .description2 = sBerryDescriptionPart2_Charti,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_KASIB_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("佛柑果"),
-        .firmness = BERRY_FIRMNESS_HARD,
-        .size = 144,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Kasib,
-        .description2 = sBerryDescriptionPart2_Kasib,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_HABAN_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("莓榴果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 23,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Haban,
-        .description2 = sBerryDescriptionPart2_Haban,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_COLBUR_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("刺耳果"),
-        .firmness = BERRY_FIRMNESS_SUPER_HARD,
-        .size = 38,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Colbur,
-        .description2 = sBerryDescriptionPart2_Colbur,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_BABIRI_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("霹霹果"),
-        .firmness = BERRY_FIRMNESS_SUPER_HARD,
-        .size = 265,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Babiri,
-        .description2 = sBerryDescriptionPart2_Babiri,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_CHILAN_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("灯浆果"),
-        .firmness = BERRY_FIRMNESS_VERY_SOFT,
-        .size = 33,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Chilan,
-        .description2 = sBerryDescriptionPart2_Chilan,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
-    },
-
-    [ITEM_ROSELI_BERRY - FIRST_BERRY_INDEX] =
-    {
-        .name = _("洛玫果"),
-        .firmness = BERRY_FIRMNESS_SOFT,
-        .size = 35,
-        .maxYield = 5,
-        .minYield = 1,
-        .description1 = sBerryDescriptionPart1_Roseli,
-        .description2 = sBerryDescriptionPart2_Roseli,
-        .stageDuration = 18,
-        .spicy = 10,
-        .dry = 0,
-        .sweet = 0,
-        .bitter = 0,
-        .sour = 40,
-        .smoothness = 70,
+        .drainRate = 7,
+        .waterBonus = 2,
+        .weedsBonus = 0,
+        .pestsBonus = 0,
     },
 };
 
@@ -1310,21 +1666,18 @@ const struct BerryCrushBerryData gBerryCrush_BerryData[] = {
 
 const struct BerryTree gBlankBerryTree = {};
 
-// unused
-void ClearEnigmaBerries(void)
-{
-    CpuFill16(0, &gSaveBlock1Ptr->enigmaBerry, sizeof(gSaveBlock1Ptr->enigmaBerry));
-}
-
 void SetEnigmaBerry(u8 *src)
 {
+#if FREE_ENIGMA_BERRY == FALSE
     u32 i;
     u8 *dest = (u8 *)&gSaveBlock1Ptr->enigmaBerry;
 
     for (i = 0; i < sizeof(gSaveBlock1Ptr->enigmaBerry); i++)
         dest[i] = src[i];
+#endif //FREE_ENIGMA_BERRY
 }
 
+#if FREE_ENIGMA_BERRY == FALSE
 static u32 GetEnigmaBerryChecksum(struct EnigmaBerry *enigmaBerry)
 {
     u32 i;
@@ -1338,22 +1691,31 @@ static u32 GetEnigmaBerryChecksum(struct EnigmaBerry *enigmaBerry)
 
     return checksum;
 }
+#endif //FREE_ENIGMA_BERRY
 
 bool32 IsEnigmaBerryValid(void)
 {
-    if (!gSaveBlock1Ptr->enigmaBerry.berry.stageDuration)
+#if FREE_ENIGMA_BERRY == FALSE
+    if (!gSaveBlock1Ptr->enigmaBerry.berry.growthDuration)
         return FALSE;
     if (!gSaveBlock1Ptr->enigmaBerry.berry.maxYield)
         return FALSE;
     if (GetEnigmaBerryChecksum(&gSaveBlock1Ptr->enigmaBerry) != gSaveBlock1Ptr->enigmaBerry.checksum)
         return FALSE;
     return TRUE;
+#else
+    return FALSE;
+#endif //FREE_ENIGMA_BERRY
 }
 
 const struct Berry *GetBerryInfo(u8 berry)
 {
     if (berry == ITEM_TO_BERRY(ITEM_ENIGMA_BERRY_E_READER) && IsEnigmaBerryValid())
+    #if FREE_ENIGMA_BERRY == FALSE
         return (struct Berry *)(&gSaveBlock1Ptr->enigmaBerry.berry);
+    #else
+        return &gBerries[0];    //never reached, but will appease the compiler gods
+    #endif //FREE_ENIGMA_BERRY
     else
     {
         if (berry == BERRY_NONE || berry > ITEM_TO_BERRY(LAST_BERRY_INDEX))
@@ -1371,19 +1733,31 @@ bool32 ObjectEventInteractionWaterBerryTree(void)
 {
     struct BerryTree *tree = GetBerryTreeInfo(GetObjectEventBerryTreeId(gSelectedObjectEvent));
 
+    if (OW_BERRY_MOISTURE)
+    {
+        tree->moistureLevel = 100;
+        if (OW_BERRY_ALWAYS_WATERABLE)
+        {
+            return TRUE;
+        }
+        AddTreeBonus(tree, GetWaterBonusByBerryType(tree->berry));
+    }
+
     switch (tree->stage)
     {
     case BERRY_STAGE_PLANTED:
-        tree->watered1 = TRUE;
+        tree->watered |= (1 << 0);
         break;
     case BERRY_STAGE_SPROUTED:
-        tree->watered2 = TRUE;
+        tree->watered |= (1 << 1);
         break;
     case BERRY_STAGE_TALLER:
-        tree->watered3 = TRUE;
+    case BERRY_STAGE_TRUNK:
+    case BERRY_STAGE_BUDDING:
+        tree->watered |= (1 << 2);
         break;
     case BERRY_STAGE_FLOWERING:
-        tree->watered4 = TRUE;
+        tree->watered |= (1 << 3);
         break;
     default:
         return FALSE;
@@ -1416,7 +1790,7 @@ void ClearBerryTrees(void)
         gSaveBlock1Ptr->berryTrees[i] = gBlankBerryTree;
 }
 
-static bool32 BerryTreeGrow(struct BerryTree *tree)
+bool32 BerryTreeGrow(struct BerryTree *tree)
 {
     if (tree->stopGrowth)
         return FALSE;
@@ -1429,26 +1803,46 @@ static bool32 BerryTreeGrow(struct BerryTree *tree)
         tree->berryYield = CalcBerryYield(tree);
     case BERRY_STAGE_PLANTED:
     case BERRY_STAGE_SPROUTED:
-    case BERRY_STAGE_TALLER:
+    case BERRY_STAGE_TRUNK:
         tree->stage++;
         break;
+    case BERRY_STAGE_TALLER:
+        if (OW_BERRY_SIX_STAGES)
+            tree->stage = BERRY_STAGE_TRUNK;
+        else
+            tree->stage++;
+        break;
+    case BERRY_STAGE_BUDDING:
+        tree->berryYield = CalcBerryYield(tree);
+        tree->stage = BERRY_STAGE_BERRIES;
+        break;
     case BERRY_STAGE_BERRIES:
-        tree->watered1 = 0;
-        tree->watered2 = 0;
-        tree->watered3 = 0;
-        tree->watered4 = 0;
+        tree->watered = 0;
         tree->berryYield = 0;
         tree->stage = BERRY_STAGE_SPROUTED;
-        if (++tree->regrowthCount == 10)
+        tree->moistureLevel = 100;
+        if (++tree->regrowthCount == ((tree->mulch == ITEM_TO_MULCH(ITEM_GOOEY_MULCH)) ? 15 : 10))
             *tree = gBlankBerryTree;
         break;
     }
     return TRUE;
 }
 
+static u16 GetMulchAffectedGrowthRate(u16 berryDuration, u8 mulch, u8 stage)
+{
+    if (stage == BERRY_STAGE_BERRIES)
+        return berryDuration;
+    if (mulch == ITEM_TO_MULCH(ITEM_GROWTH_MULCH))
+        return berryDuration / 4 * 3;
+    if (mulch == ITEM_TO_MULCH(ITEM_DAMP_MULCH))
+        return berryDuration / 2 * 3;
+    return berryDuration;
+}
+
 void BerryTreeTimeUpdate(s32 minutes)
 {
     int i;
+    u8 drainVal;
     struct BerryTree *tree;
 
     for (i = 0; i < BERRY_TREES_COUNT; i++)
@@ -1465,6 +1859,51 @@ void BerryTreeTimeUpdate(s32 minutes)
             {
                 s32 time = minutes;
 
+                // Check moisture gradient, pests and weeds
+                while (time > 0 && tree->stage != BERRY_STAGE_BERRIES)
+                {
+                    tree->moistureClock += 1;
+                    time -= 1;
+                    if (tree->moistureClock % 60 == 0)
+                    {
+                        if (OW_BERRY_MOISTURE)
+                        {
+                            drainVal = (OW_BERRY_DRAIN_RATE == GEN_4) ? GetDrainRateByBerryType(tree->berry) : (OW_BERRY_DRAIN_RATE == GEN_6_XY) ? 4 : 25;
+                            if (OW_BERRY_MULCH_USAGE)
+                            {
+                                if (tree->mulch == ITEM_TO_MULCH(ITEM_GROWTH_MULCH))
+                                    drainVal *= 2;
+                                if (tree->mulch == ITEM_TO_MULCH(ITEM_DAMP_MULCH))
+                                    drainVal /= 2;
+                                if (tree->mulch == ITEM_TO_MULCH(ITEM_BOOST_MULCH) || tree->mulch == ITEM_TO_MULCH(ITEM_AMAZE_MULCH))
+                                    drainVal = 25;
+                            }
+                            if (OW_BERRY_ALWAYS_WATERABLE && tree->moistureLevel == 0)
+                            {
+                                if (tree->berryYield > GetBerryInfo(tree->berry)->minYield + GetBerryInfo(tree->berry)->maxYield / 5)
+                                    tree->berryYield -= GetBerryInfo(tree->berry)->maxYield / 5;
+                                else
+                                    tree->berryYield = GetBerryInfo(tree->berry)->minYield;
+                            }
+                            else if (tree->moistureLevel <= drainVal)
+                                tree->moistureLevel = 0;
+                            else
+                                tree->moistureLevel -= drainVal;
+                            if (OW_BERRY_DRAIN_RATE == GEN_6_XY && tree->moistureLevel <= 4) // Without variable drain rate (and without mulches), this needs to trigger after 24 hours, hence the extra check
+                                tree->moistureLevel = 0;
+                        }
+                        if (tree->moistureClock == 120)
+                        {
+                            TryForWeeds(tree);
+                            TryForPests(tree);
+                            tree->moistureClock = 0;
+                        }
+                    }
+                }
+
+                // Check Berry growth
+                time = minutes;
+
                 while (time != 0)
                 {
                     if (tree->minutesUntilNextStage > time)
@@ -1473,11 +1912,11 @@ void BerryTreeTimeUpdate(s32 minutes)
                         break;
                     }
                     time -= tree->minutesUntilNextStage;
-                    tree->minutesUntilNextStage = GetStageDurationByBerryType(tree->berry);
+                    tree->minutesUntilNextStage = GetMulchAffectedGrowthRate(GetStageDurationByBerryType(tree->berry), tree->mulch, tree->stage);
                     if (!BerryTreeGrow(tree))
                         break;
                     if (tree->stage == BERRY_STAGE_BERRIES)
-                        tree->minutesUntilNextStage *= 4;
+                        tree->minutesUntilNextStage = GetStageDurationByBerryType(tree->berry) * ((tree->mulch == ITEM_TO_MULCH(ITEM_STABLE_MULCH)) ? 6 : 4);
                 }
             }
         }
@@ -1488,20 +1927,24 @@ void PlantBerryTree(u8 id, u8 berry, u8 stage, bool8 allowGrowth)
 {
     struct BerryTree *tree = GetBerryTreeInfo(id);
 
-    *tree = gBlankBerryTree;
     tree->berry = berry;
-    tree->minutesUntilNextStage = GetStageDurationByBerryType(berry);
+    tree->minutesUntilNextStage = GetMulchAffectedGrowthRate(GetStageDurationByBerryType(berry), tree->mulch, stage);
     tree->stage = stage;
+    tree->moistureLevel = 100;
+    if (OW_BERRY_ALWAYS_WATERABLE)
+        tree->berryYield = GetBerryInfo(berry)->maxYield;
     if (stage == BERRY_STAGE_BERRIES)
     {
         tree->berryYield = CalcBerryYield(tree);
-        tree->minutesUntilNextStage *= 4;
+        tree->minutesUntilNextStage *= ((tree->mulch == ITEM_TO_MULCH(ITEM_STABLE_MULCH)) ? 6 : 4);
     }
 
     // Stop growth, to keep tree at this stage until the player has seen it
     // allowGrowth is always true for berry trees the player has planted
     if (!allowGrowth)
         tree->stopGrowth = TRUE;
+
+    SetTreeMutations(id, berry);
 }
 
 void RemoveBerryTree(u8 id)
@@ -1517,6 +1960,11 @@ u8 GetBerryTypeByBerryTreeId(u8 id)
 u8 GetStageByBerryTreeId(u8 id)
 {
     return gSaveBlock1Ptr->berryTrees[id].stage;
+}
+
+u8 GetMulchByBerryTreeId(u8 id)
+{
+    return gSaveBlock1Ptr->berryTrees[id].mulch;
 }
 
 u8 ItemIdToBerryType(u16 item)
@@ -1545,11 +1993,6 @@ void GetBerryNameByBerryType(u8 berry, u8 *string)
     string[BERRY_NAME_LENGTH] = EOS;
 }
 
-void GetBerryCountStringByBerryType(u8 berry, u8 *dest, u32 berryCount)
-{
-    GetBerryCountString(dest, GetBerryInfo(berry)->name, berryCount);
-}
-
 void AllowBerryTreeGrowth(u8 id)
 {
     GetBerryTreeInfo(id)->stopGrowth = FALSE;
@@ -1559,13 +2002,13 @@ static u8 BerryTreeGetNumStagesWatered(struct BerryTree *tree)
 {
     u8 count = 0;
 
-    if (tree->watered1)
+    if (tree->watered & (1 << 0))
         count++;
-    if (tree->watered2)
+    if (tree->watered & (1 << 1))
         count++;
-    if (tree->watered3)
+    if (tree->watered & (1 << 2))
         count++;
-    if (tree->watered4)
+    if (tree->watered & (1 << 3))
         count++;
     return count;
 }
@@ -1591,7 +2034,7 @@ static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water)
     u32 rand;
     u32 extraYield;
 
-    if (water == 0)
+    if (water == 0 || OW_BERRY_MOISTURE)
         return min;
     else
     {
@@ -1611,10 +2054,19 @@ static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water)
 static u8 CalcBerryYield(struct BerryTree *tree)
 {
     const struct Berry *berry = GetBerryInfo(tree->berry);
-    u8 min = berry->minYield;
+    u8 min = tree->berryYield;
     u8 max = berry->maxYield;
+    u8 result;
+    if (OW_BERRY_MULCH_USAGE && (tree->mulch == ITEM_TO_MULCH(ITEM_RICH_MULCH) || tree->mulch == ITEM_TO_MULCH(ITEM_AMAZE_MULCH)))
+        min += 2;
+    if (!(OW_BERRY_MOISTURE && OW_BERRY_ALWAYS_WATERABLE))
+        min += berry->minYield;
+    if (min >= max)
+        result = max;
+    else
+        result = CalcBerryYieldInternal(max, min, BerryTreeGetNumStagesWatered(tree));
 
-    return CalcBerryYieldInternal(max, min, BerryTreeGetNumStagesWatered(tree));
+    return result;
 }
 
 static u8 GetBerryCountByBerryTreeId(u8 id)
@@ -1624,7 +2076,36 @@ static u8 GetBerryCountByBerryTreeId(u8 id)
 
 static u16 GetStageDurationByBerryType(u8 berry)
 {
-    return GetBerryInfo(berry)->stageDuration * 60;
+    return GetBerryInfo(berry)->growthDuration * 60 / (OW_BERRY_SIX_STAGES ? 6 : 4);
+}
+
+static u8 GetDrainRateByBerryType(u8 berry)
+{
+    return GetBerryInfo(berry)->drainRate;
+}
+
+static u8 GetWaterBonusByBerryType(u8 berry)
+{
+    return GetBerryInfo(berry)->waterBonus;
+}
+
+static u8 GetWeedingBonusByBerryType(u8 berry)
+{
+    u8 bonus = GetBerryInfo(berry)->weedsBonus;
+    return (bonus == 0) ? 1 : bonus * 5;
+}
+
+static u8 GetPestsBonusByBerryType(u8 berry)
+{
+    u8 bonus = GetBerryInfo(berry)->pestsBonus;
+    return (bonus == 0) ? 2 : bonus * 5;
+}
+
+bool8 CanWaterBerryPlot(void)
+{
+    if (!OW_BERRY_MOISTURE || OW_BERRY_ALWAYS_WATERABLE)
+        return TRUE;
+    return (gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(gSelectedObjectEvent)].moistureLevel == 0);
 }
 
 void ObjectEventInteractionGetBerryTreeData(void)
@@ -1647,7 +2128,7 @@ void ObjectEventInteractionGetBerryTreeData(void)
         gSpecialVar_0x8004 = GetStageByBerryTreeId(id);
     gSpecialVar_0x8005 = GetNumStagesWateredByBerryTreeId(id);
     gSpecialVar_0x8006 = GetBerryCountByBerryTreeId(id);
-    GetBerryCountStringByBerryType(berry, gStringVar1, gSpecialVar_0x8006);
+    CopyItemNameHandlePlural(BerryTypeToItemId(berry), gStringVar1, gSpecialVar_0x8006);
 }
 
 void ObjectEventInteractionGetBerryName(void)
@@ -1661,12 +2142,26 @@ void ObjectEventInteractionGetBerryCountString(void)
     u8 treeId = GetObjectEventBerryTreeId(gSelectedObjectEvent);
     u8 berry = GetBerryTypeByBerryTreeId(treeId);
     u8 count = GetBerryCountByBerryTreeId(treeId);
-    GetBerryCountStringByBerryType(berry, gStringVar1, count);
+    CopyItemNameHandlePlural(BerryTypeToItemId(berry), gStringVar1, count);
+    berry = GetTreeMutationValue(treeId);
+    if (berry > 0)
+    {
+        count = 1;
+        CopyItemNameHandlePlural(BerryTypeToItemId(berry), gStringVar3, count);
+        gSpecialVar_Result = TRUE;
+    }
+    else
+        gSpecialVar_Result = FALSE;
 }
 
 void Bag_ChooseBerry(void)
 {
     SetMainCallback2(CB2_ChooseBerry);
+}
+
+void Bag_ChooseMulch(void)
+{
+    SetMainCallback2(CB2_ChooseMulch);
 }
 
 void ObjectEventInteractionPlantBerryTree(void)
@@ -1677,12 +2172,31 @@ void ObjectEventInteractionPlantBerryTree(void)
     ObjectEventInteractionGetBerryTreeData();
 }
 
+void ObjectEventInteractionApplyMulch(void)
+{
+    u8 mulch = ITEM_TO_MULCH(gSpecialVar_ItemId);
+
+    gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(gSelectedObjectEvent)].mulch = mulch;
+    StringExpandPlaceholders(gStringVar1, gItemsInfo[gSpecialVar_ItemId].name);
+}
+
 void ObjectEventInteractionPickBerryTree(void)
 {
     u8 id = GetObjectEventBerryTreeId(gSelectedObjectEvent);
     u8 berry = GetBerryTypeByBerryTreeId(id);
+    u8 mutation = GetTreeMutationValue(id);
 
-    gSpecialVar_0x8004 = AddBagItem(BerryTypeToItemId(berry), GetBerryCountByBerryTreeId(id));
+    if (!OW_BERRY_MUTATIONS || mutation == 0)
+    {
+        gSpecialVar_0x8004 = AddBagItem(BerryTypeToItemId(berry), GetBerryCountByBerryTreeId(id));
+        return;
+    }
+    gSpecialVar_0x8004 = (CheckBagHasSpace(BerryTypeToItemId(berry), GetBerryCountByBerryTreeId(id)) && CheckBagHasSpace(BerryTypeToItemId(mutation), 1)) + 2;
+    if (gSpecialVar_0x8004 == 3)
+    {
+        AddBagItem(BerryTypeToItemId(berry), GetBerryCountByBerryTreeId(id));
+        AddBagItem(BerryTypeToItemId(mutation), 1);
+    }
 }
 
 void ObjectEventInteractionRemoveBerryTree(void)
@@ -1691,9 +2205,41 @@ void ObjectEventInteractionRemoveBerryTree(void)
     SetBerryTreeJustPicked(gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
 }
 
+void ObjectEventInteractionPullBerryWeed(void)
+{
+    struct BerryTree *tree = GetBerryTreeInfo(GetObjectEventBerryTreeId(gSelectedObjectEvent));
+    tree->weeds = FALSE;
+    AddTreeBonus(tree, GetWeedingBonusByBerryType(tree->berry));
+}
+
+void ObjectEventInteractionClearBerryPests(void)
+{
+    struct BerryTree *tree = GetBerryTreeInfo(GetObjectEventBerryTreeId(gSelectedObjectEvent));
+    tree->pests = FALSE;
+    AddTreeBonus(tree, GetPestsBonusByBerryType(tree->berry));
+}
+
 bool8 PlayerHasBerries(void)
 {
     return IsBagPocketNonEmpty(POCKET_BERRIES);
+}
+
+bool8 ObjectEventInteractionBerryHasWeed(void)
+{
+    return gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(gSelectedObjectEvent)].weeds;
+}
+
+bool8 ObjectEventInteractionBerryHasPests(void)
+{
+    u16 species;
+    if (!OW_BERRY_PESTS || !gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(gSelectedObjectEvent)].pests)
+        return FALSE;
+    species = GetBerryPestSpecies(gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(gSelectedObjectEvent)].berry);
+    if (species == SPECIES_NONE)
+        return FALSE;
+    CreateScriptedWildMon(species, 14 + Random() % 3, ITEM_NONE);
+    gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(gSelectedObjectEvent)].pests = FALSE;
+    return TRUE;
 }
 
 // Berry tree growth is frozen at their initial stage (usually, fully grown) until the player has seen the tree
@@ -1722,5 +2268,210 @@ void SetBerryTreesSeen(void)
             if (left <= x && x <= right && top <= y && y <= bottom)
                 AllowBerryTreeGrowth(gObjectEvents[i].trainerRange_berryTreeId);
         }
+    }
+}
+
+bool8 PlayerHasMulch(void)
+{
+    if (!OW_BERRY_MULCH_USAGE)
+        return FALSE;
+    if (CheckBagHasItem(ITEM_GROWTH_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_DAMP_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_STABLE_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_GOOEY_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_RICH_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_SURPRISE_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_BOOST_MULCH, 1))
+        return TRUE;
+    if (CheckBagHasItem(ITEM_AMAZE_MULCH, 1))
+        return TRUE;
+    return FALSE;
+}
+
+#if OW_BERRY_MUTATIONS == TRUE
+static const u8 sBerryMutations[][3] = {
+    {ITEM_TO_BERRY(ITEM_IAPAPA_BERRY), ITEM_TO_BERRY(ITEM_MAGO_BERRY),   ITEM_TO_BERRY(ITEM_POMEG_BERRY)},
+    {ITEM_TO_BERRY(ITEM_CHESTO_BERRY), ITEM_TO_BERRY(ITEM_PERSIM_BERRY), ITEM_TO_BERRY(ITEM_KELPSY_BERRY)},
+    {ITEM_TO_BERRY(ITEM_ORAN_BERRY),   ITEM_TO_BERRY(ITEM_PECHA_BERRY),  ITEM_TO_BERRY(ITEM_QUALOT_BERRY)},
+    {ITEM_TO_BERRY(ITEM_CHESTO_BERRY), ITEM_TO_BERRY(ITEM_PERSIM_BERRY), ITEM_TO_BERRY(ITEM_KELPSY_BERRY)},
+    {ITEM_TO_BERRY(ITEM_ASPEAR_BERRY), ITEM_TO_BERRY(ITEM_LEPPA_BERRY),  ITEM_TO_BERRY(ITEM_HONDEW_BERRY)},
+    {ITEM_TO_BERRY(ITEM_AGUAV_BERRY),  ITEM_TO_BERRY(ITEM_FIGY_BERRY),   ITEM_TO_BERRY(ITEM_GREPA_BERRY)},
+    {ITEM_TO_BERRY(ITEM_LUM_BERRY),    ITEM_TO_BERRY(ITEM_SITRUS_BERRY), ITEM_TO_BERRY(ITEM_TAMATO_BERRY)},
+    {ITEM_TO_BERRY(ITEM_HONDEW_BERRY), ITEM_TO_BERRY(ITEM_YACHE_BERRY),  ITEM_TO_BERRY(ITEM_LIECHI_BERRY)},
+    {ITEM_TO_BERRY(ITEM_QUALOT_BERRY), ITEM_TO_BERRY(ITEM_TANGA_BERRY),  ITEM_TO_BERRY(ITEM_GANLON_BERRY)},
+    {ITEM_TO_BERRY(ITEM_GREPA_BERRY),  ITEM_TO_BERRY(ITEM_ROSELI_BERRY), ITEM_TO_BERRY(ITEM_SALAC_BERRY)},
+    {ITEM_TO_BERRY(ITEM_POMEG_BERRY),  ITEM_TO_BERRY(ITEM_KASIB_BERRY),  ITEM_TO_BERRY(ITEM_PETAYA_BERRY)},
+    {ITEM_TO_BERRY(ITEM_KELPSY_BERRY), ITEM_TO_BERRY(ITEM_WACAN_BERRY),  ITEM_TO_BERRY(ITEM_APICOT_BERRY)},
+    {ITEM_TO_BERRY(ITEM_GANLON_BERRY), ITEM_TO_BERRY(ITEM_LIECHI_BERRY), ITEM_TO_BERRY(ITEM_KEE_BERRY)},
+    {ITEM_TO_BERRY(ITEM_SALAC_BERRY),  ITEM_TO_BERRY(ITEM_PETAYA_BERRY), ITEM_TO_BERRY(ITEM_MARANGA_BERRY)},
+    // Up to one more Mutation can be added here for a total of 15 (only 4 bits are allocated)
+};
+
+static u8 GetMutationOutcome(u8 berry1, u8 berry2)
+{
+    u8 i;
+    for(i = 0; i < ARRAY_COUNT(sBerryMutations); i++)
+    {
+        if ((sBerryMutations[i][0] == berry1 && sBerryMutations[i][1] == berry2)
+          ||(sBerryMutations[i][0] == berry2 && sBerryMutations[i][1] == berry1))
+            return (i + 1);
+    }
+    return 0;
+}
+
+static u8 TryForMutation(u8 berryTreeId, u8 berry)
+{
+    u8 i, j, mulch;
+    s16 x1, x2, y1, y2;
+
+    // Get location of current tree
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        if (gObjectEvents[i].trainerRange_berryTreeId == berryTreeId && gObjectEvents[i].movementType == MOVEMENT_TYPE_BERRY_TREE_GROWTH)
+            break;
+    }
+    if (i == OBJECT_EVENTS_COUNT)
+        return 0;
+
+    x1 = gObjectEvents[i].currentCoords.x;
+    y1 = gObjectEvents[i].currentCoords.y;
+
+    mulch = GetMulchByBerryTreeId(GetObjectEventBerryTreeId(i));
+
+    // Try mutation for each adjacent tree
+    for (j = 0; j < OBJECT_EVENTS_COUNT; j++)
+    {
+        if (gObjectEvents[j].active && gObjectEvents[j].movementType == MOVEMENT_TYPE_BERRY_TREE_GROWTH && GetStageByBerryTreeId(GetObjectEventBerryTreeId(j)) != BERRY_STAGE_NO_BERRY && j != i)
+        {
+            x2 = gObjectEvents[j].currentCoords.x;
+            y2 = gObjectEvents[j].currentCoords.y;
+            if (Random() % 100 < (OW_BERRY_MUTATION_CHANCE * (mulch == ITEM_TO_MULCH(ITEM_SURPRISE_MULCH) || mulch == ITEM_TO_MULCH(ITEM_AMAZE_MULCH))) && (
+                (x1 == x2 && y1 == y2 - 1) ||
+                (x1 == x2 && y1 == y2 + 1) ||
+                (x1 == x2 - 1 && y1 == y2) ||
+                (x1 == x2 + 1 && y1 == y2)))
+                return GetMutationOutcome(berry, gSaveBlock1Ptr->berryTrees[GetObjectEventBerryTreeId(j)].berry);
+        }
+    }
+    return 0;
+}
+#endif
+
+struct TreeMutationBitfield {
+  u8 a: 2;
+  u8 b: 2;
+  u8 unused: 4;
+};
+
+union TreeMutation {
+  u8 value;
+  struct TreeMutationBitfield asField;
+};
+
+static u8 GetTreeMutationValue(u8 id)
+{
+#if OW_BERRY_MUTATIONS
+    struct BerryTree *tree = GetBerryTreeInfo(id);
+    union TreeMutation myMutation;
+    if (tree->stopGrowth) // Pre-generated trees shouldn't have mutations
+        return 0;
+    myMutation.asField.a = tree->mutationA;
+    myMutation.asField.b = tree->mutationB;
+    return sBerryMutations[myMutation.value - 1][2];
+#else
+    return 0;
+#endif
+}
+
+static void SetTreeMutations(u8 id, u8 berry)
+{
+#if OW_BERRY_MUTATIONS == TRUE
+    struct BerryTree *tree = GetBerryTreeInfo(id);
+    union TreeMutation myMutation;
+
+    myMutation.value = TryForMutation(id, berry);
+    tree->mutationA = myMutation.asField.a;
+    tree->mutationB = myMutation.asField.b;
+#endif
+}
+
+static u16 GetBerryPestSpecies(u8 berryId)
+{
+#if OW_BERRY_PESTS == TRUE
+    const struct Berry *berry = GetBerryInfo(berryId);
+    switch(berry->color)
+    {
+        case BERRY_COLOR_RED:
+            return P_FAMILY_LEDYBA ? SPECIES_LEDYBA : SPECIES_NONE;
+            break;
+        case BERRY_COLOR_BLUE:
+            return P_FAMILY_VOLBEAT_ILLUMISE ? SPECIES_VOLBEAT : SPECIES_NONE;
+            break;
+        case BERRY_COLOR_PURPLE:
+            return P_FAMILY_VOLBEAT_ILLUMISE ? SPECIES_ILLUMISE : SPECIES_NONE;
+            break;
+        case BERRY_COLOR_GREEN:
+            return P_FAMILY_BURMY ? SPECIES_BURMY_PLANT_CLOAK : SPECIES_NONE;
+            break;
+        case BERRY_COLOR_YELLOW:
+            return P_FAMILY_COMBEE ? SPECIES_COMBEE : SPECIES_NONE;
+            break;
+        case BERRY_COLOR_PINK:
+            return P_FAMILY_SCATTERBUG ? SPECIES_SPEWPA : SPECIES_NONE;
+            break;
+    }
+#endif
+    return SPECIES_NONE;
+}
+
+#define BERRY_WEEDS_CHANCE 15
+#define BERRY_PESTS_CHANCE 15
+
+static void TryForWeeds(struct BerryTree *tree)
+{
+    if (!OW_BERRY_WEEDS)
+        return;
+    if (tree->weeds == TRUE)
+        return;
+    if (Random() % 100 < BERRY_WEEDS_CHANCE)
+        tree->weeds = TRUE;
+}
+
+static void TryForPests(struct BerryTree *tree)
+{
+    if (!OW_BERRY_WEEDS)
+        return;
+    if (tree->pests == TRUE)
+        return;
+    if (Random() % 100 < BERRY_PESTS_CHANCE && tree->stage > BERRY_STAGE_PLANTED)
+        tree->pests = TRUE;
+}
+
+static void AddTreeBonus(struct BerryTree *tree, u8 bonus)
+{
+    if (OW_BERRY_MOISTURE) // use watered field to save track of intermediate bonuses
+    {
+        tree->watered += bonus;
+        while (tree->watered > 10)
+        {
+            tree->watered -= 10;
+            bonus = tree->berryYield + 1;
+            if (bonus > GetBerryInfo(tree->berry)->maxYield)
+                bonus = GetBerryInfo(tree->berry)->maxYield;
+            tree->berryYield = bonus;
+        }
+    }
+    else
+    {
+        bonus = tree->berryYield + bonus / 10;
+        if (bonus > GetBerryInfo(tree->berry)->maxYield)
+            bonus = GetBerryInfo(tree->berry)->maxYield;
+        tree->berryYield = bonus;
     }
 }

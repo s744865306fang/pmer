@@ -68,7 +68,6 @@ struct ObjectEventTemplate
     /*0x00*/ u8 localId;
     /*0x01*/ u8 kind; // Always OBJ_KIND_NORMAL in Emerald.
     /*0x02*/ u16 graphicsId;
-    /*0x03*/ //u8 padding1;
     /*0x04*/ s16 x;
     /*0x06*/ s16 y;
     /*0x08*/ u8 elevation;
@@ -220,7 +219,7 @@ struct ObjectEvent
     /*0x20*/ u8 previousMovementDirection;
     /*0x21*/ u8 directionSequenceIndex;
     /*0x22*/ u8 playerCopyableMovement; // COPY_MOVE_*
-    /*0x23*/ u8 spriteId;
+    /*0x04*/ u8 spriteId;
     /*size = 0x24*/
 };
 

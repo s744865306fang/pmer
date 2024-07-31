@@ -274,8 +274,8 @@ void FieldCB_DefaultWarpExit(void)
     Overworld_PlaySpecialMapMusic();
     WarpFadeInScreen();
     SetUpWarpExitTask();
-    FollowMe_WarpSetEnd();
     LockPlayerFieldControls();
+    FollowMe_WarpSetEnd();
 }
 
 void FieldCB_WarpExitFadeFromWhite(void)

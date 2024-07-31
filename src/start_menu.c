@@ -49,7 +49,11 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 
-#define StartMenu_ActionNum 8
+#define StartMenu_ActionNum 10
+
+#if (DECAP_ENABLED) && (DECAP_MIRRORING) && !(DECAP_START_MENU)
+#define AddTextPrinterParameterized (AddTextPrinterFixedCaseParameterized)
+#endif
 
 // Menu actions
 enum
@@ -98,6 +102,7 @@ EWRAM_DATA static bool8 sSavingComplete = FALSE;
 EWRAM_DATA static u8 sSaveInfoWindowId = 0;
 
 // Menu action callbacks
+static bool8 StartMenuPCCallback(void);
 static bool8 StartMenuPokedexCallback(void);
 static bool8 StartMenuPokemonCallback(void);
 static bool8 StartMenuBagCallback(void);
@@ -105,7 +110,6 @@ static bool8 StartMenuPokeNavCallback(void);
 static bool8 StartMenuPlayerNameCallback(void);
 static bool8 StartMenuSaveCallback(void);
 static bool8 StartMenuOptionCallback(void);
-static bool8 StartMenuPCCallback(void);
 static bool8 StartMenuExitCallback(void);
 static bool8 StartMenuSafariZoneRetireCallback(void);
 static bool8 StartMenuLinkModePlayerNameCallback(void);
@@ -690,9 +694,7 @@ static bool8 HandleStartMenuInput(void)
     }
 
     if (JOY_NEW(START_BUTTON | B_BUTTON))
-    {
         return StartMenuExitCallback();
-    }
 
     return FALSE;
 }
@@ -750,7 +752,7 @@ static bool8 StartMenuPokeNavCallback(void)
         PlayRainStoppingSoundEffect();
         RemoveExtraStartMenuWindows();
         CleanupOverworldWindowsAndTilemaps();
-        SetMainCallback2(CB2_InitPokeNav);  // Display PokeNav
+        SetMainCallback2(CB2_InitPokeNav);  // Display PokéNav
 
         return TRUE;
     }
@@ -1127,20 +1129,6 @@ static u8 SaveFileExistsCallback(void)
     return SAVE_IN_PROGRESS;
 }
 
-static u8 SaveConfirmOverwriteDefaultNoCallback(void)
-{
-    DisplayYesNoMenuWithDefault(1); // Show Yes/No menu (No selected as default)
-    sSaveDialogCallback = SaveOverwriteInputCallback;
-    return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveConfirmOverwriteCallback(void)
-{
-    DisplayYesNoMenuDefaultYes(); // Show Yes/No menu
-    sSaveDialogCallback = SaveOverwriteInputCallback;
-    return SAVE_IN_PROGRESS;
-}
-
 static bool8 StartMenuPCCallback(void)
 {
 	u8 taskId;
@@ -1153,6 +1141,20 @@ static bool8 StartMenuPCCallback(void)
     }
 
     return FALSE;
+}
+
+static u8 SaveConfirmOverwriteDefaultNoCallback(void)
+{
+    DisplayYesNoMenuWithDefault(1); // Show Yes/No menu (No selected as default)
+    sSaveDialogCallback = SaveOverwriteInputCallback;
+    return SAVE_IN_PROGRESS;
+}
+
+static u8 SaveConfirmOverwriteCallback(void)
+{
+    DisplayYesNoMenuDefaultYes(); // Show Yes/No menu
+    sSaveDialogCallback = SaveOverwriteInputCallback;
+    return SAVE_IN_PROGRESS;
 }
 
 static u8 SaveOverwriteInputCallback(void)
@@ -1469,7 +1471,7 @@ static void ShowSaveInfoWindow(void)
 
     if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
     {
-        // Print pokedex count
+        // Print Pokédex count
         yOffset += 16;
         AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingPokedex, 0, yOffset, TEXT_SKIP_DRAW, NULL);
         BufferSaveMenuText(SAVE_MENU_CAUGHT, gStringVar4, color);

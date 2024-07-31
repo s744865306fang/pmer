@@ -361,8 +361,8 @@ void PlayerStep(u8 direction, u16 newKeys, u16 heldKeys)
                 MovePlayerAvatarUsingKeypadInput(direction, newKeys, heldKeys);
                 PlayerAllowForcedMovementIfMovingSameDirection();
             }
-            TryHidePlayerReflection();
         }
+        TryHidePlayerReflection();
     }
 }
 
