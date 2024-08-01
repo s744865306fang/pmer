@@ -3,7 +3,7 @@
 
 // Each 4 KiB flash sector contains 3968 bytes of actual data followed by 116 bytes of SaveBlock3 and then 12 bytes of footer.
 #define SECTOR_DATA_SIZE 4084
-#define SAVE_BLOCK_3_CHUNK_SIZE 116
+#define SAVE_BLOCK_3_CHUNK_SIZE 0 //Because SaveBlock3 is empty
 #define SECTOR_FOOTER_SIZE 12
 #define SECTOR_SIZE (SECTOR_DATA_SIZE + SAVE_BLOCK_3_CHUNK_SIZE + SECTOR_FOOTER_SIZE)
 
@@ -16,10 +16,10 @@
 
 #define SECTOR_ID_SAVEBLOCK2          0
 #define SECTOR_ID_SAVEBLOCK1_START    1
-#define SECTOR_ID_SAVEBLOCK1_END      10
-#define SECTOR_ID_PKMN_STORAGE_START  11
-#define SECTOR_ID_PKMN_STORAGE_END   27
-#define NUM_SECTORS_PER_SLOT         28
+#define SECTOR_ID_SAVEBLOCK1_END      4
+#define SECTOR_ID_PKMN_STORAGE_START  5
+#define SECTOR_ID_PKMN_STORAGE_END   13
+#define NUM_SECTORS_PER_SLOT         14
 // Save Slot 1: 0-13;  Save Slot 2: 14-27
 #define SECTOR_ID_HOF_1              28
 #define SECTOR_ID_HOF_2              29

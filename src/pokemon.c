@@ -2559,7 +2559,7 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
 
             while (retVal < PLAYER_NAME_LENGTH)
             {
-                data[retVal] = boxMon->otName[retVal];
+                data[retVal] = gSaveBlock2Ptr->playerName[retVal];
                 retVal++;
             }
 
@@ -2981,12 +2981,7 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             SET8(boxMon->isEgg);
             break;
         case MON_DATA_OT_NAME:
-        {
-            s32 i;
-            for (i = 0; i < PLAYER_NAME_LENGTH; i++)
-                boxMon->otName[i] = data[i];
             break;
-        }
         case MON_DATA_MARKINGS:
             SET8(boxMon->markings);
             break;
