@@ -143,8 +143,8 @@
 // never distributed
 #define MAX_GIFT_RIBBON 64
 
-#define MIN_LEVEL 1
-#define MAX_LEVEL 100
+#define MIN_LEVEL 0
+#define MAX_LEVEL 255
 
 #define MAX_DYNAMAX_LEVEL 10
 
@@ -212,7 +212,7 @@
 #define MAX_IV_MASK 31
 #define USE_RANDOM_IVS (MAX_PER_STAT_IVS + 1)
 #define MAX_PER_STAT_EVS ((P_EV_CAP >= GEN_6) ? 252 : 255)
-#define MAX_TOTAL_EVS 510
+#define MAX_TOTAL_EVS 1530
 #define EV_ITEM_RAISE_LIMIT ((I_VITAMIN_EV_CAP >= GEN_8) ? MAX_PER_STAT_EVS : 100)
 
 // Move category defines.

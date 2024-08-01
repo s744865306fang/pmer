@@ -746,11 +746,9 @@ static const u32 sCompressedStatuses[] =
 STATIC_ASSERT(NUM_SPECIES < (1 << 11), PokemonSubstruct0_species_TooSmall);
 STATIC_ASSERT(NUMBER_OF_MON_TYPES + 1 <= (1 << 5), PokemonSubstruct0_teraType_TooSmall);
 STATIC_ASSERT(ITEMS_COUNT < (1 << 10), PokemonSubstruct0_heldItem_TooSmall);
-STATIC_ASSERT(MAX_LEVEL <= 100, PokemonSubstruct0_experience_PotentiallTooSmall); // Maximum of ~2 million exp.
 STATIC_ASSERT(LAST_BALL < (1 << 6), PokemonSubstruct0_pokeball_TooSmall);
 STATIC_ASSERT(MOVES_COUNT_ALL < (1 << 11), PokemonSubstruct1_moves_TooSmall);
 STATIC_ASSERT(ARRAY_COUNT(sCompressedStatuses) <= (1 << 4), PokemonSubstruct3_compressedStatus_TooSmall);
-STATIC_ASSERT(MAX_LEVEL < (1 << 7), PokemonSubstruct3_metLevel_TooSmall);
 STATIC_ASSERT(NUM_VERSIONS < (1 << 4), PokemonSubstruct3_metGame_TooSmall);
 STATIC_ASSERT(MAX_DYNAMAX_LEVEL < (1 << 4), PokemonSubstruct3_dynamaxLevel_TooSmall);
 STATIC_ASSERT(MAX_PER_STAT_IVS < (1 << 5), PokemonSubstruct3_ivs_TooSmall);
@@ -2197,30 +2195,6 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
                 // so if both are 0 we assume that this is a vanilla
                 // Pokémon and replace them with EOS. This means that
                 // two CHAR_SPACE at the end of a nickname are trimmed.
-                if (POKEMON_NAME_LENGTH >= 12)
-                {
-                    if (substruct0->nickname11 == 0 && substruct0->nickname12 == 0)
-                    {
-                        data[retVal++] = EOS;
-                        data[retVal++] = EOS;
-                    }
-                    else
-                    {
-                        data[retVal++] = substruct0->nickname11;
-                        data[retVal++] = substruct0->nickname12;
-                    }
-                }
-                else if (POKEMON_NAME_LENGTH >= 11)
-                {
-                    if (substruct0->nickname11 == 0)
-                    {
-                        data[retVal++] = EOS;
-                    }
-                    else
-                    {
-                        data[retVal++] = substruct0->nickname11;
-                    }
-                }
 
                 data[retVal] = EOS;
             }
@@ -2317,7 +2291,7 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
             retVal = substruct0->pokeball;
             break;
         case MON_DATA_OT_GENDER:
-            retVal = substruct3->otGender;
+            retVal = gSaveBlock2Ptr->playerGender;
             break;
         case MON_DATA_HP_IV:
             retVal = substruct3->hpIV;
@@ -2696,10 +2670,6 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             s32 i;
             for (i = 0; i < min(sizeof(boxMon->nickname), POKEMON_NAME_LENGTH); i++)
                 boxMon->nickname[i] = data[i];
-            if (POKEMON_NAME_LENGTH >= 11)
-                substruct0->nickname11 = data[10];
-            if (POKEMON_NAME_LENGTH >= 12)
-                substruct0->nickname12 = data[11];
             break;
         }
         case MON_DATA_SPECIES:
@@ -2805,7 +2775,6 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             break;
         }
         case MON_DATA_OT_GENDER:
-            SET8(substruct3->otGender);
             break;
         case MON_DATA_HP_IV:
             SET8(substruct3->hpIV);

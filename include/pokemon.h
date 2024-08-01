@@ -122,14 +122,11 @@ struct PokemonSubstruct0
     u16 teraType:5; // 30 types.
     u16 heldItem:10; // 1023 items.
     u16 unused_02:6;
-    u32 experience:21;
-    u32 nickname11:8; // 11th character of nickname.
-    u32 unused_04:3;
+    u32 experience;
     u8 ppBonuses;
     u8 friendship;
     u16 pokeball:6; // 63 balls.
-    u16 nickname12:8; // 12th character of nickname.
-    u16 unused_0A:2;
+    u16 unused_0A:10;
 };
 
 struct PokemonSubstruct1
@@ -175,10 +172,9 @@ struct PokemonSubstruct3
 {
     u8 pokerus;
     u8 metLocation;
-    u16 metLevel:7;
+    u16 metLevel:8;
     u16 metGame:4;
     u16 dynamaxLevel:4;
-    u16 otGender:1;
     u32 hpIV:5;
     u32 attackIV:5;
     u32 defenseIV:5;
@@ -239,7 +235,7 @@ struct BoxPokemon
 {
     u32 personality;
     u32 otId;
-    u8 nickname[min(10, POKEMON_NAME_LENGTH)];
+    u8 nickname[POKEMON_NAME_LENGTH];
     u8 language:3;
     u8 hiddenNatureModifier:5; // 31 natures.
     u8 isBadEgg:1;
@@ -613,7 +609,7 @@ extern const struct MoveInfo gMovesInfo[];
 extern const u8 gFacilityClassToPicIndex[];
 extern const u8 gFacilityClassToTrainerClass[];
 extern const struct SpeciesInfo gSpeciesInfo[];
-extern const u32 gExperienceTables[][MAX_LEVEL + 1];
+extern const u32 gExperienceTables[][MAX_LEVEL + 2];
 extern const u8 gPPUpGetMask[];
 extern const u8 gPPUpClearMask[];
 extern const u8 gPPUpAddValues[];
