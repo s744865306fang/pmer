@@ -110,6 +110,7 @@ LittlerootTown_OnFrame:
 	map_script_2 VAR_LITTLEROOT_INTRO_STATE, 1, LittlerootTown_EventScript_StepOffTruckMale
 	map_script_2 VAR_LITTLEROOT_INTRO_STATE, 2, LittlerootTown_EventScript_StepOffTruckFemale
 	map_script_2 VAR_DEX_UPGRADE_JOHTO_STARTER_STATE, 1, LittlerootTown_EventScript_BeginDexUpgradeScene
+	map_script_2 VAR_HAVE_START, 1, LittlerootTown_EventScript_NewPlotStart
 	.2byte 0
 
 LittlerootTown_EventScript_StepOffTruckMale::
@@ -908,6 +909,18 @@ LittlerootTown_EventScript_GiveRunningShoes::
 	closemessage
 	delay 30
 	return
+
+LittlerootTown_EventScript_NewPlotStart::
+    fadescreen FADE_TO_WHITE
+    setptr 0x38 0x4000012
+    msgbox LittlerootTown_Text_NewPlot, MSGBOX_NPC
+    setptr 0x0 0x4000012
+    fadescreen FADE_FROM_WHITE
+    setvar VAR_HAVE_START, 2
+    end
+
+LittlerootTown_Text_NewPlot:
+    .string "命运的齿轮已然滚动\n终焉的序章即将开启...$"
 
 LittlerootTown_Text_OurNewHomeLetsGoInside:
     .string "妈妈：{PLAYER}，我们到了，宝贝！\p跟我们的行李一起挤在车厢里\n很累吧？\p这儿就是未白镇了，\p喜欢吗？\n这是我们的新家！\p虽然房子看上去有点老旧，\n但你不觉得住起来应该很舒适吗？\p而且这次你也有自己的房间了，{PLAYER}！\n我们先进屋吧。$"
