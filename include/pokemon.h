@@ -327,7 +327,6 @@ struct BattlePokemon
     /*0x2F*/ u16 item;
     /*0x31*/ u8 nickname[POKEMON_NAME_LENGTH + 1];
     /*0x3C*/ u8 ppBonuses;
-    /*0x3D*/ u8 otName[PLAYER_NAME_LENGTH + 1];
     /*0x45*/ u32 experience;
     /*0x49*/ u32 personality;
     /*0x4D*/ u32 status1;
@@ -354,7 +353,8 @@ struct SpeciesInfo /*0x8C*/
  /* 0x05 */ u8 baseSpDefense;
  /* 0x06 */ u8 types[2];
  /* 0x08 */ u8 catchRate;
- /* 0x09 */ u8 padding1;
+ /* 0x09 */ u8 isgod:1;
+            u8 padding:7;
  /* 0x0A */ u16 expYield; // expYield was changed from u8 to u16 for the new Exp System.
  /* 0x0C */ u16 evYield_HP:2;
             u16 evYield_Attack:2;

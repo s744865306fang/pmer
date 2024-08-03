@@ -8025,7 +8025,7 @@ u8 IsMonDisobedient(void)
             return 0;
         if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
             return 0;
-        if (B_OBEDIENCE_MECHANICS < GEN_8 && !IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
+        if (B_OBEDIENCE_MECHANICS < GEN_8)
             return 0;
         if (FlagGet(FLAG_BADGE08_GET)) // Rain Badge, ignore obedience altogether
             return 0;
@@ -8048,8 +8048,7 @@ u8 IsMonDisobedient(void)
             obedienceLevel = 80;
     }
 
-    if (B_OBEDIENCE_MECHANICS >= GEN_8
-     && !IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
+    if (B_OBEDIENCE_MECHANICS >= GEN_8)
         levelReferenced = gBattleMons[gBattlerAttacker].metLevel;
     else
         levelReferenced = gBattleMons[gBattlerAttacker].level;

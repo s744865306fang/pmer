@@ -4315,9 +4315,7 @@ static void Cmd_getexp(void)
                 gBattleStruct->expGettersOrder[orderId] = PARTY_SIZE;
 
             calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level;
-            if(GetMonData(&gPlayerParty[gBattlerPartyIndexes[gBattlerAttacker]], MON_DATA_LEVEL) >= 100)
-                calculatedExp = 0;
-            else if (B_SCALED_EXP >= GEN_5 && B_SCALED_EXP != GEN_6)
+            if (B_SCALED_EXP >= GEN_5 && B_SCALED_EXP != GEN_6)
                 calculatedExp /= 5;
             else
                 calculatedExp /= 7;
@@ -4352,6 +4350,8 @@ static void Cmd_getexp(void)
                 if (gBattleStruct->expShareExpValue == 0)
                     gBattleStruct->expShareExpValue = 1;
             }
+            if((GetMonData(&gPlayerParty[gBattlerPartyIndexes[gBattlerAttacker]], MON_DATA_LEVEL) >= 100) && (gSpeciesInfo[GetMonData(&gPlayerParty[gBattlerPartyIndexes[gBattlerAttacker]], MON_DATA_SPECIES)].isgod == FALSE))
+                *exp = 0;
 
             gBattleScripting.getexpState++;
             gBattleStruct->expOrderId = 0;
