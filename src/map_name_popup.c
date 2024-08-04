@@ -325,6 +325,9 @@ void HideMapNamePopUpWindow(void)
             RemoveMapNamePopUpWindow();
         }
         SetGpuReg_ForcedBlank(REG_OFFSET_BG0VOFS, 0);
+        *(u8*)0x4000048 = 0x1F;
+        *(u8*)0x4000050 = 0x40;
+        *(u16*)0x4000052 = 0x0010;
         DestroyTask(sPopupTaskId);
     }
 }
@@ -335,6 +338,10 @@ static void ShowMapNamePopUpWindow(void)
     u8 *withoutPrefixPtr;
     u8 x;
     const u8 *mapDisplayHeaderSource;
+    
+    *(u8*)0x4000048 = 0x3F;
+    *(u8*)0x4000050 = 0x41;
+    *(u16*)0x4000052 = 0x080C;
 
     if (InBattlePyramid())
     {
