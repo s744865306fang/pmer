@@ -131,11 +131,11 @@ static const u16 sSizeScreenSilhouette_Pal[] = INCBIN_U16("graphics/pokedex/size
 static const u8 sText_Stats_Buttons[] = _("{A_BUTTON}TOGGLE   {DPAD_UPDOWN}MOVES");
 static const u8 sText_Stats_Buttons_Decapped[] = _("{A_BUTTON}Toggle   {DPAD_UPDOWN}Moves");
 static const u8 sText_Stats_HP[] = _("HP");
-static const u8 sText_Stats_Attack[] = _("ATK");
-static const u8 sText_Stats_Defense[] = _("DEF");
-static const u8 sText_Stats_Speed[] = _("SPE");
-static const u8 sText_Stats_SpAttack[] = _("SP.A");
-static const u8 sText_Stats_SpDefense[] = _("SP.D");
+static const u8 sText_Stats_Attack[] = _("攻击");
+static const u8 sText_Stats_Defense[] = _("防御");
+static const u8 sText_Stats_Speed[] = _("速度");
+static const u8 sText_Stats_SpAttack[] = _("特攻");
+static const u8 sText_Stats_SpDefense[] = _("特防");
 static const u8 sText_Stats_EV_Plus1[] = _("{UP_ARROW_2}");
 static const u8 sText_Stats_EV_Plus2[] = _("{UP_ARROW_2}{UP_ARROW_2}");
 static const u8 sText_Stats_EV_Plus3[] = _("{UP_ARROW_2}{UP_ARROW_2}{UP_ARROW_2}");
@@ -2392,7 +2392,7 @@ static void Task_ClosePokedex(u8 taskId)
         ClearMonSprites();
         FreeWindowAndBgBuffers();
         DestroyTask(taskId);
-        SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
+        SetMainCallback2(CB2_ReturnToFullScreenStartMenu);
         m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 0x100);
         Free(sPokedexView);
     }
