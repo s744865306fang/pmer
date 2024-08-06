@@ -601,6 +601,7 @@ const u8 gText_WithdrawXItems[] = _("取出了{STR_VAR_2}个\n{STR_VAR_1}。");
 const u8 gText_Read[] = _("阅读");
 const u8 gText_MoveToBag[] = _("放包里");
 const u8 gText_Give2[] = _("给予");
+const u8 gText_StatEditor[] = _("IV/EV");
 const u8 gText_NoMailHere[] = _("这里没有邮件。{PAUSE_UNTIL_PRESS}");
 const u8 gText_WhatToDoWithVar1sMail[] = _("你打算怎样处理\n{STR_VAR_1}的邮件？");
 const u8 gText_MessageWillBeLost[] = _("信息将会丢失。\n确定吗？");

@@ -793,6 +793,7 @@ struct
 } static const sCursorOptions[MENU_FIELD_MOVES] =
 {
     [MENU_SUMMARY] = {gText_Summary5, CursorCb_Summary},
+    [MENU_STAT_EDIT] = {gText_StatEditor, CursorCb_StatEdit},
     [MENU_FOLLOW] = {gText_Follower, CursorCb_Follower},
     [MENU_UNFOLLOW] = {gText_Unfollow, CursorCb_Unfollow},
     [MENU_NICKNAME] = {gText_Nickname, CursorCb_Nickname},
