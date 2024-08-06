@@ -579,23 +579,23 @@ static const u8 sGenderColors[2][3] =
     {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_RED, TEXT_COLOR_RED}
 };
 
-static const u8 sText_MenuTitle[] = _("Stat Editor");
+static const u8 sText_MenuTitle[] = _("IV/EV查看");
 static const u8 sText_MenuHP[] = _("HP");
-static const u8 sText_MenuAttack[] = _("Attack");
-static const u8 sText_MenuSpAttack[] = _("Sp. Atk");
-static const u8 sText_MenuDefense[] = _("Defense");
-static const u8 sText_MenuSpDefense[] = _("Sp. Def");
-static const u8 sText_MenuSpeed[] = _("Speed");
-static const u8 sText_MenuTotal[] = _("Total");
-static const u8 sText_MenuStat[] = _("Stat");
-static const u8 sText_MenuActual[] = _("Actual");
-static const u8 sText_MenuEV[] = _("EV");
-static const u8 sText_MenuIV[] = _("IV");
+static const u8 sText_MenuAttack[] = _("物攻");
+static const u8 sText_MenuSpAttack[] = _("特攻");
+static const u8 sText_MenuDefense[] = _("物防");
+static const u8 sText_MenuSpDefense[] = _("特防");
+static const u8 sText_MenuSpeed[] = _("速度");
+static const u8 sText_MenuTotal[] = _("总计");
+static const u8 sText_MenuStat[] = _("属性");
+static const u8 sText_MenuActual[] = _("数值");
+static const u8 sText_MenuEV[] = _("努力");
+static const u8 sText_MenuIV[] = _("个体");
 static const u8 sText_MonLevel[]         = _("Lv.{CLEAR 1}{STR_VAR_1}");
 
-static const u8 sText_MenuLRButtonTextMain[]   = _("Cycle Party");
-static const u8 sText_MenuAButtonTextMain[]    = _("Edit Stats");
-static const u8 sText_MenuBButtonTextMain[]    = _("Back");
+static const u8 sText_MenuLRButtonTextMain[]   = _("切换");
+static const u8 sText_MenuAButtonTextMain[]    = _("编辑");
+static const u8 sText_MenuBButtonTextMain[]    = _("退出");
 static const u8 sText_MenuDPadButtonTextMain[] = _("Change Stat");
 
 #define BUTTON_Y 4
@@ -651,18 +651,18 @@ static void PrintMonStats()
     sStatEditorDataPtr->evTotal = 0;
     sStatEditorDataPtr->ivTotal = 0;
 
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 18, 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuStat);
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, STARTING_X - 6, 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuActual);
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, STARTING_X + SECOND_COLUMN + 4, 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuEV);
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, STARTING_X + THIRD_COLUMN + 5, 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuIV);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_SMALL, 12, 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuStat);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_SMALL, STARTING_X , 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuActual);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_SMALL, STARTING_X + SECOND_COLUMN , 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuEV);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_SMALL, STARTING_X + THIRD_COLUMN , 7, 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuIV);
 
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 24, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 0), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuHP);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 0), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuHP);
     AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 1), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuAttack);
     AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 2), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuDefense);
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 10, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 3), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuSpAttack);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 3), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuSpAttack);
     AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 4), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuSpDefense);
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 16, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 5), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuSpeed);
-    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 16, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 6), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuTotal);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 5), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuSpeed);
+    AddTextPrinterParameterized4(WINDOW_2, FONT_NARROW, 12, STARTING_Y + (DISTANCE_BETWEEN_STATS_Y * 6), 0, 0, sMenuWindowFontColors[FONT_WHITE], 0xFF, sText_MenuTotal);
 
     // Print Mon Stats
     for(i = 0; i < 6; i++)
