@@ -849,7 +849,6 @@ static bool8 MainState_WaitPageSwap(void)
 {
     s16 cursorX;
     s16 cursorY;
-    bool32 onLastColumn;
     u8 column;
 
     if (IsPageSwapAnimNotInProgress())
@@ -1585,28 +1584,10 @@ static void TryTurnChineseRow(u8 y, u8 next)
 
 static void HandleDpadMovement(struct Task *task)
 {
-    const s8 sDpadDeltaX[] =
-    {
-        [INPUT_NONE]       = 0,
-        [INPUT_DPAD_UP]    = 0,
-        [INPUT_DPAD_DOWN]  = 0,
-        [INPUT_DPAD_LEFT]  = -1,
-        [INPUT_DPAD_RIGHT] = 1
-    };
-
-    const s8 sDpadDeltaY[] =
-    {
-        [INPUT_NONE]       = 0,
-        [INPUT_DPAD_UP]    = -1,
-        [INPUT_DPAD_DOWN]  = 1,
-        [INPUT_DPAD_LEFT]  = 0,
-        [INPUT_DPAD_RIGHT] = 0
-    };
-
+    s16 prevCursorX;
     s16 cursorX;
     s16 cursorY;
-    
-    s16 prevCursorX;
+
     GetCursorPos(&cursorX, &cursorY);
     // Get new cursor position
     prevCursorX = cursorX;
@@ -1846,8 +1827,6 @@ static void CalcNextChars()
 
 static void DrawChineseTextEntry()
 {
-   u16 i, j, k;
-    
     FillWindowPixelBuffer(sNamingScreen->windows[WIN_CH], 0);
     FillWindowPixelBuffer(sNamingScreen->windows[WIN_PINYIN], 0);
     *StringCopyN(gStringVar1, GetCurrentPageChChars(), sNamingScreen->curChRowMax*2) = EOS;
@@ -2073,7 +2052,7 @@ static void CopyStrClear(const u8* src, u8* dest, u8 pad)
 
 static void PrintKeyboardKeys(u8 window, u8 page)
 {
-    u16 i, j, k;
+    u16 i;
 	u8 *buffer = gStringVar4;
     
     FillWindowPixelBuffer(window, 0);

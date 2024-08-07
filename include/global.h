@@ -175,10 +175,10 @@ extern struct SaveBlock3 *gSaveBlock3Ptr;
 
 struct Time
 {
-    /*0x00*/ s16 days;
-    /*0x02*/ s8 hours;
-    /*0x03*/ s8 minutes;
-    /*0x04*/ s8 seconds;
+    u32 days:15;
+    u32 hours:5;
+    u32 minutes:6;
+    u32 seconds:6;
 };
 
 struct Pokedex

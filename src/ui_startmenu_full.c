@@ -93,7 +93,6 @@ static EWRAM_DATA u8 *sBg1TilemapBuffer = NULL;
 static EWRAM_DATA u8 *sBg2TilemapBuffer = NULL;
 static EWRAM_DATA u8 gSelectedMenu = 0; // holds the position of the menu so that it persists in memory, 
                                         // when you go into something like the bag and leave your cursor is still on the bag
-static EWRAM_DATA u8 gStartMenuPage = 0;
 
 //==========STATIC=DEFINES==========//
 static void StartMenuFull_RunSetup(void);
@@ -611,7 +610,6 @@ static void CreatePartyMonIcons()
     u8 i = 0;
     s16 x = ICON_BOX_1_START_X;
     s16 y = ICON_BOX_1_START_Y;
-    struct Pokemon *mon;
     LoadMonIconPalettes();
     for(i = 0; i < gPlayerPartyCount; i++)
     {   
@@ -893,7 +891,6 @@ static void DestroyStatusSprites()
 // These next few functions are from the Ghoulslash UI Shell, they are the basic functions to init a brand new UI
 void Task_OpenStartMenuFullScreen(u8 taskId)
 {
-    s16 *data = gTasks[taskId].data;
     if (!gPaletteFade.active)
     {
         CleanupOverworldWindowsAndTilemaps();

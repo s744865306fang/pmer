@@ -960,7 +960,7 @@ static void MoveSelectionDisplayMoveDescription(u32 battler)
     u16 pwr = gMovesInfo[move].power;
     u16 acc = gMovesInfo[move].accuracy;
     s16 pri = gMovesInfo[move].priority;
-    u8 pwr_num[3], acc_num[3], pri_num[3], i;
+    u8 pwr_num[3], acc_num[3], pri_num[3];
     u8 pwr_desc[] = _("威力: ");
     u8 acc_desc[] = _("命中率: ");
     u8 pri_desc[] = _("优先级: ");
