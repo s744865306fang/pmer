@@ -596,7 +596,7 @@ static const u8 sText_MonLevel[]         = _("Lv.{CLEAR 1}{STR_VAR_1}");
 static const u8 sText_MenuLRButtonTextMain[]   = _("切换");
 static const u8 sText_MenuAButtonTextMain[]    = _("编辑");
 static const u8 sText_MenuBButtonTextMain[]    = _("退出");
-static const u8 sText_MenuDPadButtonTextMain[] = _("Change Stat");
+static const u8 sText_MenuDPadButtonTextMain[] = _("修改");
 
 #define BUTTON_Y 4
 static void PrintTitleToWindowMainState()
