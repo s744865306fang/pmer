@@ -2144,3 +2144,34 @@ void BufferSaveMenuText(u8 textId, u8 *dest, u8 color)
             break;
     }
 }
+
+void AddTextPrinterParameterized4Signed(u8 windowId, u8 fontId, u8 left, s8 top, u8 letterSpacing, u8 lineSpacing, const u8 *color, s8 speed, const u8 *str)
+{
+    struct TextPrinterTemplate printer;
+
+    printer.currentChar = str;
+    printer.windowId = windowId;
+    printer.fontId = fontId;
+    printer.x = left;
+    printer.currentX = printer.x;
+
+    if (top < 0)
+    {
+        printer.y = top * -1;
+        printer.unk = 1;
+    }
+    else
+    {
+        printer.y = top;
+        printer.unk = 0;
+    }
+
+    printer.currentY = printer.y;
+    printer.letterSpacing = letterSpacing;
+    printer.lineSpacing = lineSpacing;
+    printer.fgColor = color[1];
+    printer.bgColor = color[0];
+    printer.shadowColor = color[2];
+
+    AddTextPrinter(&printer, speed, NULL);
+}

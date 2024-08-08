@@ -264,6 +264,7 @@ extern s16 gSpriteCoordOffsetY;
 extern struct OamMatrix gOamMatrices[];
 extern bool8 gAffineAnimsDisabled;
 
+void RequestSpriteFrameImageCopy(u16 index, u16 tileNum, const struct SpriteFrameImage *images);
 u16 LoadSpriteSheetByTemplate(const struct SpriteTemplate *template, u8 frame);
 void ResetSpriteData(void);
 void AnimateSprites(void);
