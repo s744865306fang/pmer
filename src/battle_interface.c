@@ -2638,8 +2638,6 @@ s32 MoveBattleBar(u8 battlerId, u8 healthboxSpriteId, u8 whichBar, u8 unused)
                     &gBattleSpritesDataPtr->battleBars[battlerId].currValue,
                     B_EXPBAR_PIXELS / 8, expFraction);
     }
-    if(currentBarValue == -1)
-       break;
 
     if (whichBar == EXP_BAR || (whichBar == HEALTH_BAR && !gBattleSpritesDataPtr->battlerData[battlerId].hpNumbersNoBars))
         MoveBattleBarGraphically(battlerId, whichBar);
