@@ -20,6 +20,8 @@
 #include "constants/items.h"
 #include "config/save.h"
 
+#define BattleAnimSpeed 3
+
 // Prevent cross-jump optimization.
 #define BLOCK_CROSS_JUMP asm("");
 

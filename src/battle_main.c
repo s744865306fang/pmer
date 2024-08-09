@@ -2051,7 +2051,7 @@ void BattleMainCB2(void)
 {
     u32 i;
 
-    for(i=0;i<4;i++)
+    for(i=0;i<BattleAnimSpeed;i++)
     {
         AnimateSprites();
         BuildOamBuffer();
