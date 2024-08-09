@@ -2918,7 +2918,7 @@ static void ChangePokemonNicknamePartyScreen(void)
 static void CursorCb_Follower(u8 taskId)
 {
     u8 eventObjId;
-    u16 gfxId;
+    u16 gfxId = 0;
     u16 species;
     PlaySE(SE_SELECT);
     if(GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_IS_EGG))

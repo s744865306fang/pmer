@@ -1004,7 +1004,7 @@ const u8 sText_HP[] = _("HP");
 const u8 sText_PP[] = _("PP");
 #if CONFIG_DECAPITALIZE_TITLE_STRINGS
 const u8 sText_TitleInfo[] = _("宝可梦信息");
-const u8 sText_TitleMemo[] = _("训练师回忆");
+const u8 sText_TitleMemo[] = _("训练师笔记");
 const u8 sText_TitleSkills[] = _("宝可梦属性");
 const u8 sText_TitleBattleMoves[] = _("技能");
 const u8 sText_TitleCondition[] = _("Condition");
@@ -1020,7 +1020,7 @@ const u8 sText_TitlePageEVs[] = _("{DPAD_LEFTRIGHT}翻页 {A_BUTTON}EVs");
 const u8 sText_TitlePageStats[] = _("{DPAD_LEFTRIGHT}翻页 {A_BUTTON}属性");
 #else
 const u8 sText_TitleInfo[] = _("宝可梦信息");
-const u8 sText_TitleMemo[] = _("训练师回忆");
+const u8 sText_TitleMemo[] = _("训练师笔记");
 const u8 sText_TitleSkills[] = _("宝可梦属性");
 const u8 sText_TitleBattleMoves[] = _("技能");
 const u8 sText_TitleCondition[] = _("CONDITION");
