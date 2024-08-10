@@ -80,6 +80,8 @@ static const u8 sTeraShardDesc[] = _("破碎掉的太晶宝石\n有极低概率�
 
 static const u8 sGenericMulchDesc[] = _("培育树果时的肥料\n。但完全不适合丰\n缘的土壤。");
 
+static const u8 sEonFluteDesc[] = _("一个可以让玩家\n飞行的道具");
+
 const struct Item gItemsInfo[] =
 {
     [ITEM_NONE] =
@@ -11040,5 +11042,15 @@ const struct Item gItemsInfo[] =
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+    [ITEM_EON_FLUTE] =
+    {
+        .name = _("飞行"),
+        .price = 0,
+        .description = sEonFluteDesc,
+		.importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_EonFlute,
     },
 };

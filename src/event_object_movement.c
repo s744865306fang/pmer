@@ -3175,7 +3175,7 @@ void CameraObjectReset1(void)
     }
 }
 
-void CameraObjectSetFollowedSpriteId(u8 spriteId)
+void CameraObjectSetFollowedSpriteId(u16 spriteId)
 {
     struct Sprite *camera;
 

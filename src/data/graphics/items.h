@@ -2094,6 +2094,9 @@ const u32 gItemIconPalette_SwapSnack[] = INCBIN_U32("graphics/items/icon_palette
 const u32 gItemIcon_TwiceSpicedRadish[] = INCBIN_U32("graphics/items/icons/twice_spiced_radish.4bpp.lz");
 const u32 gItemIconPalette_TwiceSpicedRadish[] = INCBIN_U32("graphics/items/icon_palettes/twice_spiced_radish.gbapal.lz");
 
+const u32 gItemIcon_EonFlute[] = INCBIN_U32("graphics/items/icons/eon_flute.4bpp.lz");
+const u32 gItemIconPalette_EonFlute[] = INCBIN_U32("graphics/items/icon_palettes/eon_flute.gbapal.lz");
+
 const u32 gBallIcon_Poke[] = INCBIN_U32("graphics/summary_screen/ball_icons/poke.4bpp.lz");
 const u32 gBallIconPalette_Poke[] = INCBIN_U32("graphics/summary_screen/ball_icons/poke.gbapal.lz");
 const u32 gBallIcon_Safari[] = INCBIN_U32("graphics/summary_screen/ball_icons/safari.4bpp.lz");

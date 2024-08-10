@@ -3414,4 +3414,7 @@ extern const u32 gSummaryScreenPageContestMoveDetailsTilemap[];
 extern const u32 gSummaryScreenPageContestNewMoveTilemap[];
 extern const u32 gSummaryScreenPageConditionTilemap[];
 
+extern const u32 gItemIcon_EonFlute[];
+extern const u32 gItemIconPalette_EonFlute[];
+
 #endif //GUARD_GRAPHICS_H

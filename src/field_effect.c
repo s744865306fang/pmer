@@ -40,6 +40,7 @@ EWRAM_DATA s32 gFieldEffectArguments[8] = {0};
 
 // Static type declarations
 
+static void FieldCallback_Fly_2(void);
 static void Task_PokecenterHeal(u8 taskId);
 static void PokecenterHealEffect_Init(struct Task *);
 static void PokecenterHealEffect_WaitForBallPlacement(struct Task *);
@@ -3980,4 +3981,21 @@ static void UseVsSeeker_CleanUpFieldEffect(struct Task *task)
     gPlayerAvatar.preventStep = FALSE;
     FieldEffectActiveListRemove(FLDEFF_USE_VS_SEEKER);
     DestroyTask(FindTaskIdByFunc(Task_FldEffUseVsSeeker));
+}
+
+void Fldeff_FlyLand(void)
+{
+	SetMainCallback2(CB2_ReturnToField);
+	gFieldCallback = FieldCallback_Fly_2;
+}
+
+static void FieldCallback_Fly_2(void)
+{
+	u8 taskId;
+    FadeInFromBlack();
+	taskId = CreateTask(Task_UseFly, 0);
+	gTasks[taskId].data[0] = 1; //do landing anim only
+	LockPlayerFieldControls();
+    FreezeObjectEvents();
+	gFieldCallback = NULL;
 }

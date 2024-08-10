@@ -1208,7 +1208,7 @@ u8 GetPlayerAvatarFlags(void)
     return gPlayerAvatar.flags;
 }
 
-u8 GetPlayerAvatarSpriteId(void)
+u16 GetPlayerAvatarSpriteId(void)
 {
     return gPlayerAvatar.spriteId;
 }
