@@ -1096,7 +1096,6 @@ void RegionMap_GetSectionCoordsFromCurrFieldPos(u16* mapSectionId, u16* cursorPo
             x++;
         if (gSaveBlock1Ptr->pos.x > 51)
             x++;
-
         y = 0;
         if (gSaveBlock1Ptr->pos.y > 37)
             y++;
@@ -1113,7 +1112,7 @@ void RegionMap_GetSectionCoordsFromCurrFieldPos(u16* mapSectionId, u16* cursorPo
             x++;
         break;
     case MAPSEC_UNDERWATER_MARINE_CAVE:
-        GetMarineCaveCoords(cursorPosX, cursorPosY);
+        GetMarineCaveCoords(&sRegionMap->cursorPosX, &sRegionMap->cursorPosY);
         return;
     }
     *cursorPosX = gRegionMapEntries[*mapSectionId].x + x + MAPCURSOR_X_MIN;

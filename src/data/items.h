@@ -11050,7 +11050,7 @@ const struct Item gItemsInfo[] =
         .description = sEonFluteDesc,
 		.importance = 1,
         .pocket = POCKET_KEY_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
+        .type = 2,
         .fieldUseFunc = ItemUseOutOfBattle_EonFlute,
     },
 };
